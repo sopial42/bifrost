@@ -72,7 +72,6 @@ func positionDAOsToPositionDetails(positionsDAO []PositionDAO) (*[]positions.Det
 			bs := &bsDomain.Details{
 				ID:       bsDomain.ID(p.BuySignalID),
 				Pair:     p.BuySignal.Pair,
-				Interval: p.BuySignal.Interval,
 				Date:     p.BuySignal.Date,
 				Name:     p.BuySignal.Name,
 				Fullname: p.BuySignal.Fullname,

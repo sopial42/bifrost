@@ -38,6 +38,7 @@ testcases:
         assertions:
           - result.statuscode ShouldEqual 201
           - result.bodyjson ShouldHaveLength 1
+          - result.bodyjson.bodyjson0 ShouldHaveLength 8
           - result.bodyjson.bodyjson0.name ShouldEqual "simple"
           - result.bodyjson.bodyjson0.fullname ShouldEqual "simple-1-1"
           - result.bodyjson.bodyjson0.buy_signal_id ShouldEqual 123e4567-e89b-12d3-a456-426614174000
@@ -51,6 +52,3 @@ testcases:
           - result.bodyjson.bodyjson0.metadata.leverage ShouldEqual 1
           - result.bodyjson.bodyjson0.metadata.size ShouldEqual 0.1
           - result.bodyjson.bodyjson0.metadata.notes ShouldEqual "Strong trend following golden cross"
-
-
-

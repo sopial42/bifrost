@@ -1,25 +1,47 @@
 package buysignals
 
 import (
-	"time"
+	"context"
 
-	"github.com/google/uuid"
+	"github.com/jackc/pgerrcode"
 	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/driver/pgdriver"
 
+	"github.com/bifrost/internal/common/logger"
 	domain "github.com/bifrost/internal/domains/buySignals"
-	"github.com/bifrost/internal/domains/common"
+	buySignalsSVC "github.com/bifrost/internal/services/buySignals"
 )
 
-type BuySignalDAO struct {
-	bun.BaseModel `bun:"table:buy_signals"`
+type pgPersistence struct {
+	clientDB *bun.DB
+}
 
-	ID         uuid.UUID `bun:",pk,type:uuid,default:uuid_generate_v4()"`
-	BusinessID domain.BusinessID
-	Name       domain.Name
-	Fullname   domain.Fullname
-	Pair       common.Pair
-	Interval   common.Interval
-	Date       time.Time
-	Price      float64
-	Metadata   map[string]any `bun:"metadata,type:jsonb,nullzero"`
+func NewPersistence(client *bun.DB) buySignalsSVC.Persistence {
+	return &pgPersistence{clientDB: client}
+}
+
+func (c *pgPersistence) InsertBuySignals(ctx context.Context, bsReports *[]domain.Details) (*[]domain.Details, error) {
+	log := logger.GetLogger(ctx)
+	if bsReports == nil || len(*bsReports) == 0 {
+		return &[]domain.Details{}, nil
+	}
+
+	buySignalsDAO := buySignalDetailsToBuySignalDAOs(bsReports)
+	_, err := c.clientDB.
+		NewInsert().
+		Model(&buySignalsDAO).
+		Ignore().
+		Exec(ctx)
+	if err != nil {
+		if errPg, ok := err.(pgdriver.Error); ok && errPg.Field('C') == pgerrcode.UniqueViolation {
+			return &[]domain.Details{}, nil
+		}
+
+		log.Errorf("Query refused, throw pgError, %v", err)
+		return &[]domain.Details{}, err
+	}
+
+	res := buySignalDAOsToBuySignalDetails(buySignalsDAO)
+	log.Debugf("Insert buySignals done")
+	return res, nil
 }

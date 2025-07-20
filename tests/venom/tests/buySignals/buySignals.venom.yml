@@ -1,0 +1,57 @@
+name: BuySignals service
+version: '2'
+
+testcases:
+  - name: Reset db
+    steps:
+      - type: dbfixtures
+        database: postgres
+        dsn: "{{ .pgsql_dsn }}"
+        migrations: ../../data/schemas/
+        folder: ../../data/fixtures/buySignals
+        retry: 10
+  - name: Create buySignals
+    steps:
+      - type: http
+        method: POST
+        url: "{{.url}}/buySignals"
+        headers:
+          Content-Type: application/json
+        body: |
+          {
+            "buy_signals": [
+              {
+                "business_id": "trading_bot_1",
+                "pair": "BTCUSDT",
+                "name": "golden_cross",
+                "fullname": "Golden Cross BTC/USDT 1h",
+                "date": "2024-03-20T10:00:00Z",
+                "price": 65000.50,
+                "metadata": {
+                  "strategy": "moving_average",
+                  "confidence": 0.85,
+                  "indicators": {
+                    "ma_fast": 50,
+                    "ma_slow": 200
+                  }
+                }
+              }
+            ]
+          }
+        assertions:
+          - result.statuscode ShouldEqual 201
+          - result.bodyjson ShouldHaveLength 1
+          - result.bodyjson.bodyjson0 ShouldHaveLength 8
+          - result.bodyjson.bodyjson0.name ShouldEqual "golden_cross"
+          - result.bodyjson.bodyjson0.fullname ShouldEqual "Golden Cross BTC/USDT 1h"
+          - result.bodyjson.bodyjson0.business_id ShouldEqual "trading_bot_1"
+          - result.bodyjson.bodyjson0.id ShouldHaveLength 36
+          - result.bodyjson.bodyjson0.pair ShouldEqual "BTCUSDT"
+          - result.bodyjson.bodyjson0.date ShouldEqual "2024-03-20T10:00:00Z"
+          - result.bodyjson.bodyjson0.price ShouldEqual 65000.5
+          - result.bodyjson.bodyjson0.metadata ShouldHaveLength 3
+          - result.bodyjson.bodyjson0.metadata.strategy ShouldEqual "moving_average"
+          - result.bodyjson.bodyjson0.metadata.confidence ShouldEqual 0.85
+          - result.bodyjson.bodyjson0.metadata.indicators ShouldHaveLength 2
+          - result.bodyjson.bodyjson0.metadata.indicators.ma_fast ShouldEqual 50
+          - result.bodyjson.bodyjson0.metadata.indicators.ma_slow ShouldEqual 200

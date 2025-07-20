@@ -9,15 +9,14 @@ import (
 )
 
 type Details struct {
-	Name       Name
-	ID         ID
-	BusinessID BusinessID
-	Fullname   Fullname
-	Pair       common.Pair
-	Interval   common.Interval
-	Date       time.Time
-	Price      float64
-	Metadata   map[string]any // TODO use generics over MSI
+	Name       Name           `json:"name"`
+	ID         ID             `json:"id"`
+	BusinessID BusinessID     `json:"business_id"`
+	Fullname   Fullname       `json:"fullname"`
+	Pair       common.Pair    `json:"pair"`
+	Date       time.Time      `json:"date"`
+	Price      float64        `json:"price"`
+	Metadata   map[string]any `json:"metadata"`
 }
 
 type ID uuid.UUID

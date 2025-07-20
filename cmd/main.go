@@ -14,9 +14,15 @@ import (
 	gommonLog "github.com/labstack/gommon/log"
 
 	persistence "github.com/bifrost/internal/adapters/persistence"
+	
+	buySignalsPersistence "github.com/bifrost/internal/adapters/persistence/buySignals"
+	buySignalsSVC "github.com/bifrost/internal/services/buySignals"
+	buySignalsHTTPHandler "github.com/bifrost/internal/adapters/rest/buySignals"
+
 	positionsPersistence "github.com/bifrost/internal/adapters/persistence/positions"
 	positionsHTTPHandler "github.com/bifrost/internal/adapters/rest/positions"
 	positionsSVC "github.com/bifrost/internal/services/positions"
+
 
 	"github.com/bifrost/internal/common/config"
 	"github.com/bifrost/internal/common/errors"
@@ -37,6 +43,9 @@ func main() {
 	positionsPersistence := positionsPersistence.NewPersistence(pgClient.Client)
 	positionsService := positionsSVC.NewPositionsService(positionsPersistence)
 
+	buySignalsPersistence := buySignalsPersistence.NewPersistence(pgClient.Client)
+	buySignalsService := buySignalsSVC.NewBuySignalsService(buySignalsPersistence)
+
 	// Custom logger
 	log := logger.NewLogger(config.Logger)
 	defer log.Sync() //nolint:errcheck
@@ -56,6 +65,7 @@ func main() {
 	engine.Use(corsConfig)
 
 	positionsHTTPHandler.SetHandler(engine, positionsService)
+	buySignalsHTTPHandler.SetHandler(engine, buySignalsService)
 
 	// Start the server and handle shutdown
 	go func() {
