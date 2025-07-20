@@ -42,7 +42,7 @@ func buySignalDetailsToBuySignalDAOs(buySignals *[]domain.Details) []BuySignalDA
 	return buySignalsDAO
 }
 
-func buySignalDAOsToBuySignalDetails(buySignalsDAO []BuySignalDAO) (*[]domain.Details) {
+func buySignalDAOsToBuySignalDetails(buySignalsDAO []BuySignalDAO) *[]domain.Details {
 	buySignals := make([]domain.Details, len(buySignalsDAO))
 
 	for i, bs := range buySignalsDAO {

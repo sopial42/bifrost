@@ -46,6 +46,10 @@ func (p *positionsHandler) createPositions(context echo.Context) error {
 		return appErrors.NewInvalidInput("invalid input", err)
 	}
 
+	if len(newPositionInput.Positions) == 0 {
+		return appErrors.NewInvalidInput("invalid input, empty positions", nil)
+	}
+
 	newPositionsDetails := make([]domain.Details, len(newPositionInput.Positions))
 	for i, pos := range newPositionInput.Positions {
 		newPositionsDetails[i] = domain.Details{

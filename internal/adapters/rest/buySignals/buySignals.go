@@ -47,6 +47,10 @@ func (p *buySignalsHandler) createBuySignals(context echo.Context) error {
 		return appErrors.NewInvalidInput("invalid input", err)
 	}
 
+	if len(newBuySignalInput.BuySignals) == 0 {
+		return appErrors.NewInvalidInput("invalid input, empty buy signals", nil)
+	}
+
 	newBuySignalsDetails := make([]domain.Details, len(newBuySignalInput.BuySignals))
 	for i, bs := range newBuySignalInput.BuySignals {
 		newBuySignalsDetails[i] = domain.Details{

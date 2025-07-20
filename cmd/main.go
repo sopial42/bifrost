@@ -23,6 +23,9 @@ import (
 	positionsHTTPHandler "github.com/bifrost/internal/adapters/rest/positions"
 	positionsSVC "github.com/bifrost/internal/services/positions"
 
+	ratiosPersistence "github.com/bifrost/internal/adapters/persistence/ratios"
+	ratiosHTTPHandler "github.com/bifrost/internal/adapters/rest/ratios"
+	ratiosSVC "github.com/bifrost/internal/services/ratios"
 
 	"github.com/bifrost/internal/common/config"
 	"github.com/bifrost/internal/common/errors"
@@ -46,6 +49,9 @@ func main() {
 	buySignalsPersistence := buySignalsPersistence.NewPersistence(pgClient.Client)
 	buySignalsService := buySignalsSVC.NewBuySignalsService(buySignalsPersistence)
 
+	ratiosPersistence := ratiosPersistence.NewPersistence(pgClient.Client)
+	ratiosService := ratiosSVC.NewRatiosService(ratiosPersistence)
+
 	// Custom logger
 	log := logger.NewLogger(config.Logger)
 	defer log.Sync() //nolint:errcheck
@@ -66,6 +72,7 @@ func main() {
 
 	positionsHTTPHandler.SetHandler(engine, positionsService)
 	buySignalsHTTPHandler.SetHandler(engine, buySignalsService)
+	ratiosHTTPHandler.SetHandler(engine, ratiosService)
 
 	// Start the server and handle shutdown
 	go func() {
