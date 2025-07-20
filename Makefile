@@ -122,4 +122,4 @@ endif
 dbtty:
 	@echo "[INFO] Login to psql inside db container"
 	@echo "[INFO] exemple command: \dt;"
-	@docker exec -it db psql -U bifrost -d bifrost
+	@docker exec -it bifrost_db psql -U bifrost -d bifrost

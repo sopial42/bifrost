@@ -1,0 +1,56 @@
+name: Positions service
+version: '2'
+
+testcases:
+  - name: Reset db
+    steps:
+      - type: dbfixtures
+        database: postgres
+        dsn: "{{ .pgsql_dsn }}"
+        migrations: ../../data/schemas/
+        folder: ../../data/fixtures/positions
+        retry: 10
+  - name: Create positions
+    steps:
+      - type: http
+        method: POST
+        url: "{{.url}}/positions"
+        headers:
+          Content-Type: application/json
+        body: |
+          {
+            "positions": [
+              {
+                "buy_signal_id": "123e4567-e89b-12d3-a456-426614174000",
+                "name": "simple",
+                "fullname": "simple-1-1",
+                "tp": 10,
+                "sl": 9,
+                "metadata": {
+                  "entry_type": "market",
+                  "leverage": 1,
+                  "size": 0.1,
+                  "notes": "Strong trend following golden cross"
+                }
+              }
+            ]
+          }
+        assertions:
+          - result.statuscode ShouldEqual 201
+          - result.bodyjson ShouldHaveLength 1
+          - result.bodyjson.bodyjson0.name ShouldEqual "simple"
+          - result.bodyjson.bodyjson0.fullname ShouldEqual "simple-1-1"
+          - result.bodyjson.bodyjson0.buy_signal_id ShouldEqual 123e4567-e89b-12d3-a456-426614174000
+          - result.bodyjson.bodyjson0.id ShouldHaveLength 36
+          - result.bodyjson.bodyjson0.buy_signal ShouldBeNil
+          - result.bodyjson.bodyjson0.tp ShouldEqual 10
+          - result.bodyjson.bodyjson0.sl ShouldEqual 9
+          - result.bodyjson.bodyjson0.serial_id ShouldEqual 10001
+          - result.bodyjson.bodyjson0.metadata ShouldHaveLength 4
+          - result.bodyjson.bodyjson0.metadata.entry_type ShouldEqual "market"
+          - result.bodyjson.bodyjson0.metadata.leverage ShouldEqual 1
+          - result.bodyjson.bodyjson0.metadata.size ShouldEqual 0.1
+          - result.bodyjson.bodyjson0.metadata.notes ShouldEqual "Strong trend following golden cross"
+
+
+

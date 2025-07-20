@@ -1,0 +1,29 @@
+- id: "123e4567-e89b-12d3-a456-426614174000"
+  business_id: "trading_bot_1"
+  pair: "BTCUSDT"
+  interval: "1h"
+  name: "golden_cross"
+  fullname: "Golden Cross BTC/USDT 1h"
+  date: "2024-03-20T10:00:00Z"
+  price: 65000.50
+  metadata:
+    strategy: "moving_average"
+    confidence: 0.85
+    indicators:
+      ma_fast: 50
+      ma_slow: 200
+
+- id: "223e4567-e89b-12d3-a456-426614174001"
+  business_id: "trading_bot_1"
+  pair: "ETHUSDT"
+  interval: "4h"
+  name: "rsi_oversold"
+  fullname: "RSI Oversold ETH/USDT 4h"
+  date: "2024-03-20T12:00:00Z"
+  price: 3500.75
+  metadata:
+    strategy: "rsi"
+    confidence: 0.92
+    indicators:
+      rsi_value: 28
+      timeframe: "4h"

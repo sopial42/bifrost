@@ -1,0 +1,106 @@
+package common
+
+import "fmt"
+
+type Interval string
+
+const IntervalLoggerKey = "interval"
+
+const (
+	// S1  Interval = "1s"
+	M1  Interval = "1m"
+	M3  Interval = "3m"
+	M5  Interval = "5m"
+	M15 Interval = "15m"
+	M30 Interval = "30m"
+	H1  Interval = "1h"
+	H2  Interval = "2h"
+	H4  Interval = "4h"
+	H6  Interval = "6h"
+	H8  Interval = "8h"
+	H12 Interval = "12h"
+	D1  Interval = "1d"
+	W1  Interval = "1w"
+)
+
+var Intervals = []Interval{
+	// S1,
+	M1,
+	M3,
+	M5,
+	M15,
+	M30,
+	H1,
+	H2,
+	H4,
+	H6,
+	H8,
+	H12,
+	D1,
+	W1,
+}
+
+var ArgsDefaultIntervals []string
+var AllAvailableInterval map[Interval]bool
+
+func init() {
+	AllAvailableInterval = make(map[Interval]bool, len(Intervals))
+	ArgsDefaultIntervals = make([]string, len(Intervals))
+	for i, itv := range Intervals {
+		AllAvailableInterval[itv] = true
+		ArgsDefaultIntervals[i] = string(itv)
+	}
+}
+
+func (i Interval) IsValid() bool {
+	_, ok := AllAvailableInterval[i]
+	return ok
+}
+
+func ParseInterval(arg string) (Interval, error) {
+	_, ok := AllAvailableInterval[Interval(arg)]
+
+	if !ok {
+		return "", fmt.Errorf("wrong interval: %q", arg)
+	} else {
+		return Interval(arg), nil
+	}
+}
+
+func ParseIntervals(argsInterval []string) ([]Interval, error) {
+	intervals := make([]Interval, len(argsInterval))
+	errors := []string{}
+	for i, itv := range argsInterval {
+		if !AllAvailableInterval[Interval(itv)] {
+			errors = append(errors, itv)
+		} else {
+			intervals[i] = Interval(itv)
+		}
+	}
+
+	if len(errors) > 0 {
+		return []Interval{}, fmt.Errorf("interval args not allowed: %s", errors)
+	}
+	return intervals, nil
+}
+
+func (i Interval) String() string {
+	return string(i)
+}
+
+func (i Interval) GetBelowInterval() Interval {
+	var belowInterval Interval
+	for _, testedInterval := range Intervals {
+		if belowInterval == "" {
+			belowInterval = testedInterval
+		}
+
+		if testedInterval == i {
+			return belowInterval
+		}
+
+		belowInterval = testedInterval
+	}
+
+	return belowInterval
+}

@@ -13,11 +13,15 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	gommonLog "github.com/labstack/gommon/log"
 
-	"github.com/bifrost/internal/adapters/persistence"
-	"github.com/bifrost/internal/common/errors"
+	persistence "github.com/bifrost/internal/adapters/persistence"
+	positionsPersistence "github.com/bifrost/internal/adapters/persistence/positions"
+	positionsHTTPHandler "github.com/bifrost/internal/adapters/rest/positions"
+	positionsSVC "github.com/bifrost/internal/services/positions"
+
 	"github.com/bifrost/internal/common/config"
-	"github.com/bifrost/internal/common/pinger"
+	"github.com/bifrost/internal/common/errors"
 	"github.com/bifrost/internal/common/logger"
+	"github.com/bifrost/internal/common/pinger"
 )
 
 const pingRoute = "/ping"
@@ -29,6 +33,9 @@ func main() {
 	pgClient := persistence.NewPGClient(config.DB)
 	// Configure echo engine
 	engine := echo.New()
+
+	positionsPersistence := positionsPersistence.NewPersistence(pgClient.Client)
+	positionsService := positionsSVC.NewPositionsService(positionsPersistence)
 
 	// Custom logger
 	log := logger.NewLogger(config.Logger)
@@ -47,6 +54,8 @@ func main() {
 		AllowMethods:     []string{echo.GET, echo.POST, echo.PUT, echo.PATCH, echo.DELETE, echo.OPTIONS},
 	})
 	engine.Use(corsConfig)
+
+	positionsHTTPHandler.SetHandler(engine, positionsService)
 
 	// Start the server and handle shutdown
 	go func() {
