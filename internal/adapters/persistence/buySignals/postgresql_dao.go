@@ -33,7 +33,7 @@ func buySignalDetailsToBuySignalDAOs(buySignals *[]domain.Details) []BuySignalDA
 			Name:       domain.Name(bs.Name),
 			Fullname:   domain.Fullname(bs.Fullname),
 			Pair:       common.Pair(bs.Pair),
-			Date:       bs.Date,
+			Date:       time.Time(bs.Date),
 			Price:      bs.Price,
 			Metadata:   bs.Metadata,
 		}
@@ -52,7 +52,7 @@ func buySignalDAOsToBuySignalDetails(buySignalsDAO []BuySignalDAO) *[]domain.Det
 			Name:       domain.Name(bs.Name),
 			Fullname:   domain.Fullname(bs.Fullname),
 			Pair:       common.Pair(bs.Pair),
-			Date:       bs.Date,
+			Date:       domain.Date(bs.Date),
 			Price:      bs.Price,
 			Metadata:   bs.Metadata,
 		}

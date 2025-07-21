@@ -14,15 +14,21 @@ type Details struct {
 	BusinessID BusinessID     `json:"business_id"`
 	Fullname   Fullname       `json:"fullname"`
 	Pair       common.Pair    `json:"pair"`
-	Date       time.Time      `json:"date"`
+	Date       Date           `json:"date"`
 	Price      float64        `json:"price"`
 	Metadata   map[string]any `json:"metadata"`
 }
 
 type ID uuid.UUID
 
+type Date time.Time
+
 func (i ID) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, uuid.UUID(i).String())), nil
+}
+
+func (d Date) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf(`"%s"`, time.Time(d).Format(time.RFC3339))), nil
 }
 
 // Name is the buySignal name

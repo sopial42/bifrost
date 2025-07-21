@@ -11,8 +11,8 @@ import (
 type PositionDAO struct {
 	bun.BaseModel `bun:"table:positions"`
 
-	ID          uuid.UUID                   `bun:"id,type:uuid,default:uuid_generate_v4()"`
-	SerialID    int64                       `bun:"serial_id,pk,autoincrement"`
+	ID          uuid.UUID                   `bun:"id,pk,type:uuid,default:uuid_generate_v4()"`
+	SerialID    int64                       `bun:"serial_id,autoincrement"`
 	BuySignalID uuid.UUID                   `bun:"type:uuid"`
 	BuySignal   *bsPersistence.BuySignalDAO `bun:"rel:belongs-to,join:buy_signal_id=id"`
 	Name        string                      `bun:"name"`
@@ -72,7 +72,7 @@ func positionDAOsToPositionDetails(positionsDAO []PositionDAO) (*[]positions.Det
 			bs := &bsDomain.Details{
 				ID:       bsDomain.ID(p.BuySignalID),
 				Pair:     p.BuySignal.Pair,
-				Date:     p.BuySignal.Date,
+				Date:     bsDomain.Date(p.BuySignal.Date),
 				Name:     p.BuySignal.Name,
 				Fullname: p.BuySignal.Fullname,
 				Price:    p.BuySignal.Price,

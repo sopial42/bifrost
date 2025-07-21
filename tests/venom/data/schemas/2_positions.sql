@@ -2,8 +2,8 @@
 -- +migrate Up
 
 CREATE TABLE positions(
-  id              UUID DEFAULT uuid_generate_v4(),
-  serial_id       BIGSERIAL PRIMARY KEY,
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  serial_id       BIGSERIAL,
   buy_signal_id   UUID NOT NULL,
   name            TEXT NOT NULL,
   fullname        TEXT NOT NULL,

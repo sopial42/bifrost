@@ -19,6 +19,10 @@ import (
 	buySignalsSVC "github.com/bifrost/internal/services/buySignals"
 	buySignalsHTTPHandler "github.com/bifrost/internal/adapters/rest/buySignals"
 
+	candlesPersistence "github.com/bifrost/internal/adapters/persistence/candles"
+	candlesHTTPHandler "github.com/bifrost/internal/adapters/rest/candles"
+	candlesSVC "github.com/bifrost/internal/services/candles"
+
 	positionsPersistence "github.com/bifrost/internal/adapters/persistence/positions"
 	positionsHTTPHandler "github.com/bifrost/internal/adapters/rest/positions"
 	positionsSVC "github.com/bifrost/internal/services/positions"
@@ -43,11 +47,14 @@ func main() {
 	// Configure echo engine
 	engine := echo.New()
 
-	positionsPersistence := positionsPersistence.NewPersistence(pgClient.Client)
-	positionsService := positionsSVC.NewPositionsService(positionsPersistence)
-
 	buySignalsPersistence := buySignalsPersistence.NewPersistence(pgClient.Client)
 	buySignalsService := buySignalsSVC.NewBuySignalsService(buySignalsPersistence)
+
+	candlesPersistence := candlesPersistence.NewPersistence(pgClient.Client)
+	candlesService := candlesSVC.NewCandlesService(candlesPersistence)
+
+	positionsPersistence := positionsPersistence.NewPersistence(pgClient.Client)
+	positionsService := positionsSVC.NewPositionsService(positionsPersistence)
 
 	ratiosPersistence := ratiosPersistence.NewPersistence(pgClient.Client)
 	ratiosService := ratiosSVC.NewRatiosService(ratiosPersistence)
@@ -70,8 +77,9 @@ func main() {
 	})
 	engine.Use(corsConfig)
 
-	positionsHTTPHandler.SetHandler(engine, positionsService)
 	buySignalsHTTPHandler.SetHandler(engine, buySignalsService)
+	candlesHTTPHandler.SetHandler(engine, candlesService)
+	positionsHTTPHandler.SetHandler(engine, positionsService)
 	ratiosHTTPHandler.SetHandler(engine, ratiosService)
 
 	// Start the server and handle shutdown

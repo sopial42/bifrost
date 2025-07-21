@@ -65,7 +65,7 @@ func ratiosDAOsToRatiosDetails(ratiosDAO []RatioDAO) (*[]domain.Ratio, error) {
 					Pair:       common.Pair(r.Position.BuySignal.Pair),
 					Name:       buySignals.Name(r.Position.BuySignal.Name),
 					Fullname:   buySignals.Fullname(r.Position.BuySignal.Fullname),
-					Date:       r.Position.BuySignal.Date,
+					Date:       buySignals.Date(r.Position.BuySignal.Date),
 					Price:      r.Position.BuySignal.Price,
 					Metadata:   r.Position.BuySignal.Metadata,
 				}

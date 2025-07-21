@@ -58,7 +58,7 @@ func (p *buySignalsHandler) createBuySignals(context echo.Context) error {
 			BusinessID: bs.BusinessID,
 			Fullname:   bs.Fullname,
 			Pair:       bs.Pair,
-			Date:       bs.Date,
+			Date:       domain.Date(bs.Date),
 			Price:      bs.Price,
 			Metadata:   bs.Metadata,
 		}

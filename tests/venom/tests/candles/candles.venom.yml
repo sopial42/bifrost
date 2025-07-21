@@ -1,0 +1,45 @@
+name: Candles service
+version: '2'
+
+testcases:
+  - name: Reset db
+    steps:
+      - type: dbfixtures
+        database: postgres
+        dsn: "{{ .pgsql_dsn }}"
+        migrations: ../../data/schemas/
+        folder: ../../data/fixtures/candles
+        retry: 10
+  - name: Create candles
+    steps:
+      - type: http
+        method: POST
+        url: "{{.url}}/candles"
+        headers:
+          Content-Type: application/json
+        body: |
+          {
+            "candles": [
+              {
+                "pair": "BTCUSDT",
+                "date": "2024-03-20T10:00:00Z",
+                "interval": "1h",
+                "open": 65000.5,
+                "close": 66000.5,
+                "high": 67000.5,
+                "low": 61000.5
+              }
+            ]
+          }
+        assertions:
+          - result.statuscode ShouldEqual 201
+          - result.bodyjson ShouldHaveLength 1
+          - result.bodyjson.bodyjson0 ShouldHaveLength 8
+          - result.bodyjson.bodyjson0.id ShouldHaveLength 36
+          - result.bodyjson.bodyjson0.date ShouldEqual 2024-03-20T10:00:00Z
+          - result.bodyjson.bodyjson0.pair ShouldEqual "BTCUSDT"
+          - result.bodyjson.bodyjson0.interval ShouldEqual "1h"
+          - result.bodyjson.bodyjson0.open ShouldEqual 65000.5
+          - result.bodyjson.bodyjson0.close ShouldEqual 66000.5
+          - result.bodyjson.bodyjson0.high ShouldEqual 67000.5
+          - result.bodyjson.bodyjson0.low ShouldEqual 61000.5
