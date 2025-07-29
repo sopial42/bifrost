@@ -32,9 +32,9 @@ import (
 	ratiosSVC "github.com/bifrost/internal/services/ratios"
 
 	"github.com/bifrost/internal/common/config"
-	"github.com/bifrost/internal/common/errors"
-	"github.com/bifrost/internal/common/logger"
 	"github.com/bifrost/internal/common/pinger"
+	"github.com/bifrost/pkg/errors"
+	"github.com/bifrost/pkg/logger"
 )
 
 const pingRoute = "/ping"

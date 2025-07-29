@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
-	appErrors "github.com/bifrost/internal/common/errors"
+	appErrors "github.com/bifrost/pkg/errors"
 	buysignals "github.com/bifrost/internal/domains/buySignals"
 	domain "github.com/bifrost/internal/domains/positions"
 	positionsSVC "github.com/bifrost/internal/services/positions"

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/bifrost/internal/common/logger"
+	"github.com/bifrost/pkg/logger"
 	"github.com/labstack/echo/v4"
 )
 

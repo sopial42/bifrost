@@ -6,10 +6,10 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	appErrors "github.com/bifrost/internal/common/errors"
 	domain "github.com/bifrost/internal/domains/candles"
 	"github.com/bifrost/internal/domains/common"
 	candlesSVC "github.com/bifrost/internal/services/candles"
+	appErrors "github.com/bifrost/pkg/errors"
 )
 
 type candlesHandler struct {
@@ -41,8 +41,12 @@ type Inputcandles struct {
 	Low      float64         `json:"low"`
 }
 
+type NewCandleInputC struct {
+	Candles []domain.Candle `json:"candles"`
+}
+
 func (p *candlesHandler) createcandles(context echo.Context) error {
-	newCandleInput := new(NewCandleInput)
+	newCandleInput := new(NewCandleInputC)
 	if err := context.Bind(newCandleInput); err != nil {
 		return appErrors.NewInvalidInput("invalid input", err)
 	}
@@ -51,20 +55,7 @@ func (p *candlesHandler) createcandles(context echo.Context) error {
 		return appErrors.NewInvalidInput("invalid input, empty candles", nil)
 	}
 
-	newcandlesDetails := make([]domain.Candle, len(newCandleInput.Candles))
-	for i, candle := range newCandleInput.Candles {
-		newcandlesDetails[i] = domain.Candle{
-			Pair:     common.Pair(candle.Pair),
-			Interval: common.Interval(candle.Interval),
-			Date:     domain.Date(candle.Date),
-			Open:     candle.Open,
-			Close:    candle.Close,
-			High:     candle.High,
-			Low:      candle.Low,
-		}
-	}
-
-	candles, err := p.candlesSVC.CreateCandles(context.Request().Context(), &newcandlesDetails)
+	candles, err := p.candlesSVC.CreateCandles(context.Request().Context(), &newCandleInput.Candles)
 	if err != nil {
 		return appErrors.NewUnexpected("unable to create candles", err)
 	}

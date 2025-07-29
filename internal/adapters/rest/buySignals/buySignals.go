@@ -6,9 +6,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	appErrors "github.com/bifrost/internal/common/errors"
 	domain "github.com/bifrost/internal/domains/buySignals"
 	"github.com/bifrost/internal/domains/common"
+	appErrors "github.com/bifrost/pkg/errors"
 	buySignalsSVC "github.com/bifrost/internal/services/buySignals"
 )
 

@@ -7,8 +7,8 @@ import (
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/driver/pgdriver"
 
-	"github.com/bifrost/internal/common/logger"
 	domain "github.com/bifrost/internal/domains/buySignals"
+	"github.com/bifrost/pkg/logger"
 	buySignalsSVC "github.com/bifrost/internal/services/buySignals"
 )
 

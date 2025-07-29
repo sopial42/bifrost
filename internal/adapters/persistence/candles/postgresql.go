@@ -5,9 +5,9 @@ import (
 
 	"github.com/uptrace/bun"
 
-	"github.com/bifrost/internal/common/logger"
 	domain "github.com/bifrost/internal/domains/candles"
 	candlesSVC "github.com/bifrost/internal/services/candles"
+	"github.com/bifrost/pkg/logger"
 )
 
 type pgPersistence struct {

@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/bifrost/internal/common/logger"
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 
+	"github.com/bifrost/pkg/logger"
 	domain "github.com/bifrost/internal/domains/candles"
 	"github.com/bifrost/internal/domains/common"
 )
@@ -34,6 +34,7 @@ func candlesToCandlesDAO(ctx context.Context, candles *[]domain.Candle, isUpdate
 		return nil
 	}
 
+	log.Debugf("candles: %v", candles)
 	res := make([]CandleDAO, len(*candles))
 	for i, c := range *candles {
 		res[i] = CandleDAO{

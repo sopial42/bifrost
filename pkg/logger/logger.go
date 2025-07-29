@@ -16,8 +16,8 @@ type ctxKey struct{}
 var loggerKey = &ctxKey{}
 
 const (
-	usernameKey  = "username"
-	requestIDKey = "request_id"
+	usernameKey = "username"
+	// requestIDKey = "request_id"
 )
 
 type Logger interface {

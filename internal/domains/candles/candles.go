@@ -1,6 +1,7 @@
 package candles
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -12,6 +13,21 @@ type Date time.Time
 
 func (d Date) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, time.Time(d).Format(time.RFC3339))), nil
+}
+
+func (d *Date) UnmarshalJSON(data []byte) error {
+	var dateStr string
+	if err := json.Unmarshal(data, &dateStr); err != nil {
+		return fmt.Errorf("failed to unmarshal date: %w", err)
+	}
+
+	parsedTime, err := time.Parse(time.RFC3339, dateStr)
+	if err != nil {
+		return fmt.Errorf("failed to parse date: %w", err)
+	}
+
+	*d = Date(parsedTime)
+	return nil
 }
 
 type ID uuid.UUID
@@ -30,7 +46,7 @@ func GetDateStrFromUnixTimeMilli(date time.Time) string {
 }
 
 type Candle struct {
-	ID       ID              `json:"id"`
+	ID       ID              `json:"id,omitempty"`
 	Date     Date            `json:"date"`
 	Pair     common.Pair     `json:"pair"`
 	Interval common.Interval `json:"interval"`

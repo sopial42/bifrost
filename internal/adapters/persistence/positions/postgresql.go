@@ -3,12 +3,12 @@ package positions
 import (
 	"context"
 
-	logger "github.com/bifrost/internal/common/logger"
 	"github.com/jackc/pgerrcode"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/driver/pgdriver"
 
 	domain "github.com/bifrost/internal/domains/positions"
+	"github.com/bifrost/pkg/logger"
 	positionSVC "github.com/bifrost/internal/services/positions"
 )
 

@@ -3,12 +3,12 @@ package ratios
 import (
 	"context"
 
-	logger "github.com/bifrost/internal/common/logger"
 	"github.com/jackc/pgerrcode"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/driver/pgdriver"
 
 	domain "github.com/bifrost/internal/domains/ratios"
+	"github.com/bifrost/pkg/logger"
 	ratiosSVC "github.com/bifrost/internal/services/ratios"
 )
 
