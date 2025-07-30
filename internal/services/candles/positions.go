@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	domain "github.com/bifrost/internal/domains/candles"
+	domain "github.com/bifrost/pkg/domains/candles"
 )
 
 type candlesService struct {

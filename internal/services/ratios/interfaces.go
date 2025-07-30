@@ -3,7 +3,7 @@ package ratios
 import (
 	"context"
 
-	domain "github.com/bifrost/internal/domains/ratios"
+	domain "github.com/bifrost/pkg/domains/ratios"
 )
 
 type Service interface {

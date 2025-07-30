@@ -3,7 +3,7 @@ package ratios
 import (
 	"time"
 
-	"github.com/bifrost/internal/domains/positions"
+	"github.com/bifrost/pkg/domains/positions"
 	"github.com/google/uuid"
 )
 

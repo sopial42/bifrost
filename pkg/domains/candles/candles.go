@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/bifrost/internal/domains/common"
+	"github.com/bifrost/pkg/domains/common"
 	"github.com/google/uuid"
 )
 
@@ -46,7 +46,7 @@ func GetDateStrFromUnixTimeMilli(date time.Time) string {
 }
 
 type Candle struct {
-	ID       ID              `json:"id,omitempty"`
+	ID       *ID              `json:"id,omitempty"`
 	Date     Date            `json:"date"`
 	Pair     common.Pair     `json:"pair"`
 	Interval common.Interval `json:"interval"`

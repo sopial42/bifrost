@@ -2,8 +2,8 @@ package positions
 
 import (
 	bsPersistence "github.com/bifrost/internal/adapters/persistence/buySignals"
-	bsDomain "github.com/bifrost/internal/domains/buySignals"
-	positions "github.com/bifrost/internal/domains/positions"
+	bsDomain "github.com/bifrost/pkg/domains/buySignals"
+	positions "github.com/bifrost/pkg/domains/positions"
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 )

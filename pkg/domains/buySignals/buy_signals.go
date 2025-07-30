@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/bifrost/internal/domains/common"
+	"github.com/bifrost/pkg/domains/common"
 	"github.com/google/uuid"
 )
 

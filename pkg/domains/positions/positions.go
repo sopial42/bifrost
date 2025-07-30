@@ -3,7 +3,7 @@ package positions
 import (
 	"fmt"
 
-	buySignals "github.com/bifrost/internal/domains/buySignals"
+	buySignals "github.com/bifrost/pkg/domains/buySignals"
 	"github.com/google/uuid"
 )
 

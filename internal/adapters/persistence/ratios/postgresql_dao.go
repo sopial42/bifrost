@@ -7,10 +7,10 @@ import (
 	"github.com/uptrace/bun"
 
 	positionsDAO "github.com/bifrost/internal/adapters/persistence/positions"
-	buySignals "github.com/bifrost/internal/domains/buySignals"
-	"github.com/bifrost/internal/domains/common"
-	"github.com/bifrost/internal/domains/positions"
-	domain "github.com/bifrost/internal/domains/ratios"
+	buySignals "github.com/bifrost/pkg/domains/buySignals"
+	"github.com/bifrost/pkg/domains/common"
+	"github.com/bifrost/pkg/domains/positions"
+	domain "github.com/bifrost/pkg/domains/ratios"
 )
 
 type RatioDAO struct {

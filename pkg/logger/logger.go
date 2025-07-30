@@ -5,7 +5,6 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/bifrost/internal/common/config"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
@@ -19,6 +18,11 @@ const (
 	usernameKey = "username"
 	// requestIDKey = "request_id"
 )
+
+type Config struct {
+	Level         string
+	IsDevelopment bool
+}
 
 type Logger interface {
 	Infof(format string, args ...interface{})
@@ -39,13 +43,13 @@ type zapLogger struct {
 // GetDefaultConfig is only used in case of an error getting the logger
 // Using this config in production is an issue
 func GetDefaultLogger() Logger {
-	return NewLogger(config.LoggerConfig{
+	return NewLogger(Config{
 		IsDevelopment: false,
 		Level:         "info",
 	})
 }
 
-func NewLogger(config config.LoggerConfig) Logger {
+func NewLogger(config Config) Logger {
 	var zapConfig zap.Config
 
 	if config.IsDevelopment {

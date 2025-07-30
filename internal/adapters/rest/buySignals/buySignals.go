@@ -6,10 +6,10 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	domain "github.com/bifrost/internal/domains/buySignals"
-	"github.com/bifrost/internal/domains/common"
-	appErrors "github.com/bifrost/pkg/errors"
 	buySignalsSVC "github.com/bifrost/internal/services/buySignals"
+	domain "github.com/bifrost/pkg/domains/buySignals"
+	"github.com/bifrost/pkg/domains/common"
+	appErrors "github.com/bifrost/pkg/errors"
 )
 
 type buySignalsHandler struct {

@@ -6,17 +6,14 @@ import (
 	"strconv"
 
 	"github.com/joho/godotenv"
-)
 
-type LoggerConfig struct {
-	Level         string
-	IsDevelopment bool
-}
+	"github.com/bifrost/pkg/logger"
+)
 
 type Config struct {
 	Cors   Cors
 	DB     DBConfig
-	Logger LoggerConfig
+	Logger logger.Config
 	Port   string
 }
 
@@ -37,7 +34,7 @@ func Load() *Config {
 	_ = godotenv.Load()
 
 	return &Config{
-		Logger: LoggerConfig{
+		Logger: logger.Config{
 			Level:         mustGet("LOG_LEVEL"),
 			IsDevelopment: mustGetBool("LOG_IS_DEVELOPMENT"),
 		},

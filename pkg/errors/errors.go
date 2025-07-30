@@ -5,10 +5,10 @@ import (
 	"fmt"
 )
 
-type ErrorCode int
+type AppErrorCode int
 
 const (
-	ErrUnexpected ErrorCode = iota
+	ErrUnexpected AppErrorCode = iota + 1
 	ErrNotFound
 	ErrUnauthorized
 	ErrForbidden
@@ -17,19 +17,19 @@ const (
 )
 
 type AppError struct {
-	Code    ErrorCode
+	Code    AppErrorCode
 	Message string
 	Origin  error
 }
 
-func (e *AppError) Error() string {
+func (e AppError) Error() string {
 	if e.Origin != nil {
 		return fmt.Sprintf("%s: %v", e.Message, e.Origin)
 	}
 	return e.Message
 }
 
-func (e *AppError) Unwrap() error {
+func (e AppError) Unwrap() error {
 	return e.Origin
 }
 

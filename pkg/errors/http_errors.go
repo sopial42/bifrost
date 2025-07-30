@@ -8,7 +8,22 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var unexpectedErrMessage = map[string]string{"error": "internal server error"}
+type ErrResponse struct {
+	Error Details `json:"error"`
+}
+
+type Details struct {
+	AppCode AppErrorCode `json:"code"`
+	Message string       `json:"message"`
+	TraceID string       `json:"trace_id,omitempty"`
+}
+
+var unexpectedErrMessage = ErrResponse{
+	Error: Details{
+		AppCode: ErrUnexpected,
+		Message: "internal server error",
+	},
+}
 
 //nolint:errcheck
 var ErrorsHandler = func(err error, ctx echo.Context) {
@@ -23,29 +38,18 @@ var ErrorsHandler = func(err error, ctx echo.Context) {
 
 	if errors.As(err, &appErr) {
 		log.Debugf("AppError: %v", appErr)
-		errMessage := map[string]string{
-			"error": err.Error(),
+		errResponse := ErrResponse{
+			Error: Details{
+				AppCode: appErr.Code,
+				Message: appErr.Message,
+			},
 		}
 
-		switch appErr.Code {
-		case ErrInvalidInput:
-			ctx.JSON(http.StatusBadRequest, errMessage)
-		case ErrAlreadyExists:
-			ctx.JSON(http.StatusConflict, errMessage)
-		case ErrUnauthorized:
-			ctx.JSON(http.StatusUnauthorized, errMessage)
-		case ErrForbidden:
-			ctx.JSON(http.StatusForbidden, errMessage)
-		case ErrNotFound:
-			ctx.JSON(http.StatusNotFound, errMessage)
-		default:
-			log.Err(appErr).Errorf("AppError unhandled")
-			// if traceID := tracing.GetTracingIDFromContext(c); traceID != "" {
-			// 	unexpectedErrMessage["trace_id"] = traceID
-			// }
-			ctx.JSON(http.StatusInternalServerError, unexpectedErrMessage)
-		}
+		// if traceID := tracing.GetTracingIDFromContext(c); traceID != "" {
+		// 	errMessage.Error.TraceID = traceID
+		// }
 
+		ctx.JSON(errResponse.GetHTTPCode(), errResponse)
 		return
 	}
 
@@ -60,22 +64,41 @@ var ErrorsHandler = func(err error, ctx echo.Context) {
 			}
 
 			log.Err(err).Debugf("HTTP error")
-			errMessage := map[string]string{
-				"error": msgStr,
+			errResponse := ErrResponse{
+				Error: Details{
+					Message: msgStr,
+				},
 			}
 
-			ctx.JSON(httpErr.Code, errMessage)
+			ctx.JSON(httpErr.Code, errResponse)
 			return
 		}
 	}
 
 	// Handle if its an unexpected error
 	// if traceID := tracing.GetTracingIDFromContext(c); traceID != "" {
-	// 	unexpectedErrMessage["trace_id"] = traceID
+	// 	unexpectedErrMessage.TraceID = traceID
 	// }
 
 	log.Err(err).Errorf("HTTP unexpected error")
 	ctx.JSON(http.StatusInternalServerError, unexpectedErrMessage)
+}
+
+func (e *ErrResponse) GetHTTPCode() int {
+	switch e.Error.AppCode {
+	case ErrInvalidInput:
+		return http.StatusBadRequest
+	case ErrAlreadyExists:
+		return http.StatusConflict
+	case ErrUnauthorized:
+		return http.StatusUnauthorized
+	case ErrForbidden:
+		return http.StatusForbidden
+	case ErrNotFound:
+		return http.StatusNotFound
+	}
+
+	return http.StatusInternalServerError
 }
 
 func SetCustomErrorHandler(echo *echo.Echo) {

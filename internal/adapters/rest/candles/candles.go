@@ -1,14 +1,13 @@
 package candles
 
 import (
+	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/labstack/echo/v4"
 
-	domain "github.com/bifrost/internal/domains/candles"
-	"github.com/bifrost/internal/domains/common"
 	candlesSVC "github.com/bifrost/internal/services/candles"
+	domain "github.com/bifrost/pkg/domains/candles"
 	appErrors "github.com/bifrost/pkg/errors"
 )
 
@@ -24,41 +23,52 @@ func SetHandler(e *echo.Echo, service candlesSVC.Service) {
 	apiV1 := e.Group("/api/v1")
 	{
 		apiV1.POST("/candles", p.createcandles)
+		// apiV1.GET("/candles", p.getcandles)
 	}
 }
 
 type NewCandleInput struct {
-	Candles []Inputcandles `json:"candles"`
-}
-
-type Inputcandles struct {
-	Pair     common.Pair     `json:"pair"`
-	Interval common.Interval `json:"interval"`
-	Date     time.Time       `json:"date"`
-	Open     float64         `json:"open"`
-	Close    float64         `json:"close"`
-	High     float64         `json:"high"`
-	Low      float64         `json:"low"`
-}
-
-type NewCandleInputC struct {
 	Candles []domain.Candle `json:"candles"`
 }
 
 func (p *candlesHandler) createcandles(context echo.Context) error {
-	newCandleInput := new(NewCandleInputC)
-	if err := context.Bind(newCandleInput); err != nil {
+	input := new(NewCandleInput)
+	if err := context.Bind(input); err != nil {
 		return appErrors.NewInvalidInput("invalid input", err)
 	}
 
-	if len(newCandleInput.Candles) == 0 {
+	if len(input.Candles) == 0 {
 		return appErrors.NewInvalidInput("invalid input, empty candles", nil)
 	}
 
-	candles, err := p.candlesSVC.CreateCandles(context.Request().Context(), &newCandleInput.Candles)
+	candles, err := p.candlesSVC.CreateCandles(context.Request().Context(), &input.Candles)
 	if err != nil {
-		return appErrors.NewUnexpected("unable to create candles", err)
+		return fmt.Errorf("unable to create candles: %w", err)
 	}
 
 	return context.JSON(http.StatusCreated, candles)
 }
+
+// func (p *candlesHandler) getcandles(context echo.Context) error {
+// 	ctx := context.Request().Context()
+// 	pair := context.QueryParam("pair")
+// 	interval := context.QueryParam("interval")
+// 	startDate := context.QueryParam("start_date")
+
+// 	// ensure start_date is a valid date
+// 	date, err := time.Parse(time.RFC3339, startDate)
+// 	if err != nil {
+// 		return appErrors.NewInvalidInput("invalid input, start_date is not a valid date", err)
+// 	}
+
+// 	if date.After(time.Now()) {
+// 		return appErrors.NewInvalidInput("invalid input, start_date is in the future", nil)
+// 	}
+
+// 	candles, err := p.candlesSVC.GetCandles(ctx, pair, interval, date)
+// 	if err != nil {
+// 		return fmt.Errorf("unable to get candles: %w", err)
+
+// 	}
+// 	return context.JSON(http.StatusOK, "ok")
+// }

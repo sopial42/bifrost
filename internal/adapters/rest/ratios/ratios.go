@@ -7,10 +7,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
-	appErrors "github.com/bifrost/pkg/errors"
-	"github.com/bifrost/internal/domains/positions"
-	domain "github.com/bifrost/internal/domains/ratios"
 	ratiosSVC "github.com/bifrost/internal/services/ratios"
+	"github.com/bifrost/pkg/domains/positions"
+	domain "github.com/bifrost/pkg/domains/ratios"
+	appErrors "github.com/bifrost/pkg/errors"
 )
 
 type ratiosHandler struct {

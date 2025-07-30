@@ -3,7 +3,7 @@ package candles
 import (
 	"context"
 
-	domain "github.com/bifrost/internal/domains/candles"
+	domain "github.com/bifrost/pkg/domains/candles"
 )
 
 type Service interface {

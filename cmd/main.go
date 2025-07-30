@@ -31,8 +31,8 @@ import (
 	ratiosHTTPHandler "github.com/bifrost/internal/adapters/rest/ratios"
 	ratiosSVC "github.com/bifrost/internal/services/ratios"
 
-	"github.com/bifrost/internal/common/config"
-	"github.com/bifrost/internal/common/pinger"
+	"github.com/bifrost/internal/config"
+	"github.com/bifrost/pkg/pinger"
 	"github.com/bifrost/pkg/errors"
 	"github.com/bifrost/pkg/logger"
 )
