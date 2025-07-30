@@ -8,16 +8,15 @@ import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 
+	domain "github.com/bifrost/pkg/domains/candles"
+	"github.com/bifrost/pkg/domains/common"
 	"github.com/bifrost/pkg/logger"
-	domain "github.com/bifrost/internal/domains/candles"
-	"github.com/bifrost/internal/domains/common"
 )
 
 type CandleDAO struct {
 	bun.BaseModel `bun:"table:candles"`
 
 	ID       uuid.UUID `bun:",pk,type:uuid,default:uuid_generate_v4()"`
-	SerialID int64     `bun:"serial_id,autoincrement"`
 	Date     time.Time
 	Pair     string
 	Interval string
@@ -25,7 +24,7 @@ type CandleDAO struct {
 	Close    float64
 	High     float64
 	Low      float64
-	RSI      json.RawMessage `bun:"type:jsonb"`
+	RSI      *json.RawMessage `bun:"type:jsonb"`
 }
 
 func candlesToCandlesDAO(ctx context.Context, candles *[]domain.Candle, isUpdate bool) *[]CandleDAO {
@@ -49,7 +48,12 @@ func candlesToCandlesDAO(ctx context.Context, candles *[]domain.Candle, isUpdate
 		}
 
 		if isUpdate {
-			res[i].ID = uuid.UUID(c.ID)
+			if c.ID == nil {
+				log.Warnf("unable to update candle as ID is nil: %+v", c)
+				continue
+			}
+
+			res[i].ID = uuid.UUID(*c.ID)
 		}
 
 		if c.RSI != nil {
@@ -59,22 +63,30 @@ func candlesToCandlesDAO(ctx context.Context, candles *[]domain.Candle, isUpdate
 				continue
 			}
 
-			res[i].RSI = msg
+			*res[i].RSI = msg
 		}
 	}
 
 	return &res
 }
 
-func candlesDAOsToCandlesDetails(candlesDAO *[]CandleDAO) *[]domain.Candle {
+func candlesDAOsToCandlesDetails(ctx context.Context, candlesDAO *[]CandleDAO) *[]domain.Candle {
+	log := logger.GetLogger(ctx)
 	if candlesDAO == nil {
 		return nil
 	}
 
 	candles := make([]domain.Candle, len(*candlesDAO))
 	for i, c := range *candlesDAO {
+		if c.ID == uuid.Nil {
+			log.Warnf("unable to convert candle as ID is nil: %+v", c)
+			continue
+		}
+
+		id := domain.ID(c.ID)
+
 		candles[i] = domain.Candle{
-			ID:       domain.ID(c.ID),
+			ID:       &id,
 			Date:     domain.Date(c.Date),
 			Pair:     common.Pair(c.Pair),
 			Interval: common.Interval(c.Interval),
@@ -86,7 +98,7 @@ func candlesDAOsToCandlesDetails(candlesDAO *[]CandleDAO) *[]domain.Candle {
 
 		if c.RSI != nil {
 			rsi := domain.RSI{}
-			err := json.Unmarshal(c.RSI, &rsi)
+			err := json.Unmarshal(*c.RSI, &rsi)
 			if err == nil {
 				candles[i].RSI = &rsi
 			}
