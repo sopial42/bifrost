@@ -6,10 +6,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
-	positionsSVC "github.com/bifrost/internal/services/positions"
-	buysignals "github.com/bifrost/pkg/domains/buySignals"
-	domain "github.com/bifrost/pkg/domains/positions"
-	appErrors "github.com/bifrost/pkg/errors"
+	positionsSVC "github.com/sopial42/bifrost/internal/services/positions"
+	buysignals "github.com/sopial42/bifrost/pkg/domains/buySignals"
+	domain "github.com/sopial42/bifrost/pkg/domains/positions"
+	appErrors "github.com/sopial42/bifrost/pkg/errors"
 )
 
 type positionsHandler struct {

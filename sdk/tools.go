@@ -1,6 +1,6 @@
 package sdk
 
-import "github.com/bifrost/pkg/domains/candles"
+import "github.com/sopial42/bifrost/pkg/domains/candles"
 
 func createCandlesChunk(newCandles *[]candles.Candle, chunckSize int) *[][]candles.Candle {
 	var chuncks [][]candles.Candle

@@ -7,7 +7,7 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"github.com/bifrost/pkg/logger"
+	"github.com/sopial42/bifrost/pkg/logger"
 )
 
 type Config struct {

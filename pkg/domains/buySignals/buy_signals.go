@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/bifrost/pkg/domains/common"
 	"github.com/google/uuid"
+	"github.com/sopial42/bifrost/pkg/domains/common"
 )
 
 type Details struct {

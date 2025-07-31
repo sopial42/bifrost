@@ -3,8 +3,8 @@ package ratios
 import (
 	"time"
 
-	"github.com/bifrost/pkg/domains/positions"
 	"github.com/google/uuid"
+	"github.com/sopial42/bifrost/pkg/domains/positions"
 )
 
 type Ratio struct {

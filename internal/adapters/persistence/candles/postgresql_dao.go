@@ -8,9 +8,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 
-	domain "github.com/bifrost/pkg/domains/candles"
-	"github.com/bifrost/pkg/domains/common"
-	"github.com/bifrost/pkg/logger"
+	domain "github.com/sopial42/bifrost/pkg/domains/candles"
+	"github.com/sopial42/bifrost/pkg/domains/common"
+	"github.com/sopial42/bifrost/pkg/logger"
 )
 
 type CandleDAO struct {

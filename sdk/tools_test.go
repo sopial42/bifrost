@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bifrost/pkg/domains/candles"
-	"github.com/bifrost/pkg/domains/common"
-	"github.com/bifrost/pkg/sdk"
+	"github.com/sopial42/bifrost/pkg/domains/candles"
+	"github.com/sopial42/bifrost/pkg/domains/common"
+	"github.com/sopial42/bifrost/pkg/sdk"
 )
 
 func Test_createCandlesChunk(t *testing.T) {

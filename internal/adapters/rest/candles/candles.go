@@ -6,10 +6,10 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	candlesSVC "github.com/bifrost/internal/services/candles"
-	domain "github.com/bifrost/pkg/domains/candles"
-	"github.com/bifrost/pkg/domains/common"
-	appErrors "github.com/bifrost/pkg/errors"
+	candlesSVC "github.com/sopial42/bifrost/internal/services/candles"
+	domain "github.com/sopial42/bifrost/pkg/domains/candles"
+	"github.com/sopial42/bifrost/pkg/domains/common"
+	appErrors "github.com/sopial42/bifrost/pkg/errors"
 )
 
 type candlesHandler struct {

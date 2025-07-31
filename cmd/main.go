@@ -13,28 +13,28 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	gommonLog "github.com/labstack/gommon/log"
 
-	persistence "github.com/bifrost/internal/adapters/persistence"
+	persistence "github.com/sopial42/bifrost/internal/adapters/persistence"
 
-	buySignalsPersistence "github.com/bifrost/internal/adapters/persistence/buySignals"
-	buySignalsHTTPHandler "github.com/bifrost/internal/adapters/rest/buySignals"
-	buySignalsSVC "github.com/bifrost/internal/services/buySignals"
+	buySignalsPersistence "github.com/sopial42/bifrost/internal/adapters/persistence/buySignals"
+	buySignalsHTTPHandler "github.com/sopial42/bifrost/internal/adapters/rest/buySignals"
+	buySignalsSVC "github.com/sopial42/bifrost/internal/services/buySignals"
 
-	candlesPersistence "github.com/bifrost/internal/adapters/persistence/candles"
-	candlesHTTPHandler "github.com/bifrost/internal/adapters/rest/candles"
-	candlesSVC "github.com/bifrost/internal/services/candles"
+	candlesPersistence "github.com/sopial42/bifrost/internal/adapters/persistence/candles"
+	candlesHTTPHandler "github.com/sopial42/bifrost/internal/adapters/rest/candles"
+	candlesSVC "github.com/sopial42/bifrost/internal/services/candles"
 
-	positionsPersistence "github.com/bifrost/internal/adapters/persistence/positions"
-	positionsHTTPHandler "github.com/bifrost/internal/adapters/rest/positions"
-	positionsSVC "github.com/bifrost/internal/services/positions"
+	positionsPersistence "github.com/sopial42/bifrost/internal/adapters/persistence/positions"
+	positionsHTTPHandler "github.com/sopial42/bifrost/internal/adapters/rest/positions"
+	positionsSVC "github.com/sopial42/bifrost/internal/services/positions"
 
-	ratiosPersistence "github.com/bifrost/internal/adapters/persistence/ratios"
-	ratiosHTTPHandler "github.com/bifrost/internal/adapters/rest/ratios"
-	ratiosSVC "github.com/bifrost/internal/services/ratios"
+	ratiosPersistence "github.com/sopial42/bifrost/internal/adapters/persistence/ratios"
+	ratiosHTTPHandler "github.com/sopial42/bifrost/internal/adapters/rest/ratios"
+	ratiosSVC "github.com/sopial42/bifrost/internal/services/ratios"
 
-	"github.com/bifrost/internal/config"
-	"github.com/bifrost/pkg/errors"
-	"github.com/bifrost/pkg/logger"
-	"github.com/bifrost/pkg/pinger"
+	"github.com/sopial42/bifrost/internal/config"
+	"github.com/sopial42/bifrost/pkg/errors"
+	"github.com/sopial42/bifrost/pkg/logger"
+	"github.com/sopial42/bifrost/pkg/pinger"
 )
 
 const pingRoute = "/ping"

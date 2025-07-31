@@ -1,10 +1,10 @@
 package positions
 
 import (
-	bsPersistence "github.com/bifrost/internal/adapters/persistence/buySignals"
-	bsDomain "github.com/bifrost/pkg/domains/buySignals"
-	positions "github.com/bifrost/pkg/domains/positions"
 	"github.com/google/uuid"
+	bsPersistence "github.com/sopial42/bifrost/internal/adapters/persistence/buySignals"
+	bsDomain "github.com/sopial42/bifrost/pkg/domains/buySignals"
+	positions "github.com/sopial42/bifrost/pkg/domains/positions"
 	"github.com/uptrace/bun"
 )
 

@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/bifrost/pkg/logger"
 	"github.com/labstack/echo/v4"
+	"github.com/sopial42/bifrost/pkg/logger"
 )
 
 type ErrResponse struct {

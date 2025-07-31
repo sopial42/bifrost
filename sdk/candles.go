@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/bifrost/pkg/domains/candles"
-	"github.com/bifrost/pkg/domains/common"
-	"github.com/bifrost/pkg/errors"
-	"github.com/bifrost/pkg/sdk"
+	"github.com/sopial42/bifrost/pkg/domains/candles"
+	"github.com/sopial42/bifrost/pkg/domains/common"
+	"github.com/sopial42/bifrost/pkg/errors"
+	"github.com/sopial42/bifrost/pkg/sdk"
 )
 
 const defaultChunckSize = 500

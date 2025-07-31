@@ -6,8 +6,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 
-	domain "github.com/bifrost/pkg/domains/buySignals"
-	"github.com/bifrost/pkg/domains/common"
+	domain "github.com/sopial42/bifrost/pkg/domains/buySignals"
+	"github.com/sopial42/bifrost/pkg/domains/common"
 )
 
 type BuySignalDAO struct {

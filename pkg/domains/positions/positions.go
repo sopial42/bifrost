@@ -3,8 +3,8 @@ package positions
 import (
 	"fmt"
 
-	buySignals "github.com/bifrost/pkg/domains/buySignals"
 	"github.com/google/uuid"
+	buySignals "github.com/sopial42/bifrost/pkg/domains/buySignals"
 )
 
 type Details struct {

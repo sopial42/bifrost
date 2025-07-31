@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/bifrost/pkg/errors"
+	"github.com/sopial42/bifrost/pkg/errors"
 )
 
 type Client struct {
@@ -83,7 +83,7 @@ func (c *Client) Post(url string, body []byte) ([]byte, error) {
 }
 
 func (c *Client) Get(url string) ([]byte, error) {
-	res, err := c.httpClient.Get(c.baseURL+url)
+	res, err := c.httpClient.Get(c.baseURL + url)
 	if err != nil {
 		return nil, errors.NewUnexpected("sdk unable to GET request", err)
 	}

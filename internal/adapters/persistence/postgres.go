@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/bifrost/internal/config"
+	"github.com/sopial42/bifrost/internal/config"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"

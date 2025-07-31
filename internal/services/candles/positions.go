@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	domain "github.com/bifrost/pkg/domains/candles"
-	"github.com/bifrost/pkg/domains/common"
-	appErrors "github.com/bifrost/pkg/errors"
+	domain "github.com/sopial42/bifrost/pkg/domains/candles"
+	"github.com/sopial42/bifrost/pkg/domains/common"
+	appErrors "github.com/sopial42/bifrost/pkg/errors"
 )
 
 type candlesService struct {

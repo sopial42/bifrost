@@ -7,10 +7,10 @@ import (
 
 	"github.com/uptrace/bun"
 
-	candlesSVC "github.com/bifrost/internal/services/candles"
-	domain "github.com/bifrost/pkg/domains/candles"
-	"github.com/bifrost/pkg/domains/common"
-	"github.com/bifrost/pkg/logger"
+	candlesSVC "github.com/sopial42/bifrost/internal/services/candles"
+	domain "github.com/sopial42/bifrost/pkg/domains/candles"
+	"github.com/sopial42/bifrost/pkg/domains/common"
+	"github.com/sopial42/bifrost/pkg/logger"
 )
 
 type pgPersistence struct {

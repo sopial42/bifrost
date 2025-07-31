@@ -3,7 +3,7 @@ package buySignals
 import (
 	"context"
 
-	domain "github.com/bifrost/pkg/domains/buySignals"
+	domain "github.com/sopial42/bifrost/pkg/domains/buySignals"
 )
 
 type Service interface {

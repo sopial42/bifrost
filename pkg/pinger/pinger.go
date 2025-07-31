@@ -7,7 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	appErrors "github.com/bifrost/pkg/errors"
+	appErrors "github.com/sopial42/bifrost/pkg/errors"
 )
 
 type Pinger interface {

@@ -7,9 +7,9 @@ import (
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/driver/pgdriver"
 
-	buySignalsSVC "github.com/bifrost/internal/services/buySignals"
-	domain "github.com/bifrost/pkg/domains/buySignals"
-	"github.com/bifrost/pkg/logger"
+	buySignalsSVC "github.com/sopial42/bifrost/internal/services/buySignals"
+	domain "github.com/sopial42/bifrost/pkg/domains/buySignals"
+	"github.com/sopial42/bifrost/pkg/logger"
 )
 
 type pgPersistence struct {

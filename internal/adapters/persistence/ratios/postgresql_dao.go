@@ -6,11 +6,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 
-	positionsDAO "github.com/bifrost/internal/adapters/persistence/positions"
-	buySignals "github.com/bifrost/pkg/domains/buySignals"
-	"github.com/bifrost/pkg/domains/common"
-	"github.com/bifrost/pkg/domains/positions"
-	domain "github.com/bifrost/pkg/domains/ratios"
+	positionsDAO "github.com/sopial42/bifrost/internal/adapters/persistence/positions"
+	buySignals "github.com/sopial42/bifrost/pkg/domains/buySignals"
+	"github.com/sopial42/bifrost/pkg/domains/common"
+	"github.com/sopial42/bifrost/pkg/domains/positions"
+	domain "github.com/sopial42/bifrost/pkg/domains/ratios"
 )
 
 type RatioDAO struct {

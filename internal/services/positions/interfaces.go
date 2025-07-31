@@ -3,7 +3,7 @@ package positions
 import (
 	"context"
 
-	domain "github.com/bifrost/pkg/domains/positions"
+	domain "github.com/sopial42/bifrost/pkg/domains/positions"
 )
 
 type Service interface {
