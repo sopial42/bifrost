@@ -13,9 +13,10 @@ type ErrResponse struct {
 }
 
 type Details struct {
-	AppCode AppErrorCode `json:"code"`
+	AppCode AppErrorCode `json:"app_code"`
 	Message string       `json:"message"`
 	TraceID string       `json:"trace_id,omitempty"`
+	Origin  error        `json:"-"`
 }
 
 var unexpectedErrMessage = ErrResponse{
@@ -42,6 +43,7 @@ var ErrorsHandler = func(err error, ctx echo.Context) {
 			Error: Details{
 				AppCode: appErr.Code,
 				Message: appErr.Message,
+				Origin:  appErr.Origin,
 			},
 		}
 
@@ -80,6 +82,7 @@ var ErrorsHandler = func(err error, ctx echo.Context) {
 	// 	unexpectedErrMessage.TraceID = traceID
 	// }
 
+	unexpectedErrMessage.Error.Origin = err
 	log.Err(err).Errorf("HTTP unexpected error")
 	ctx.JSON(http.StatusInternalServerError, unexpectedErrMessage)
 }

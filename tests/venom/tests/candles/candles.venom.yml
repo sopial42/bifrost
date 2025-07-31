@@ -8,7 +8,7 @@ testcases:
         database: postgres
         dsn: "{{ .pgsql_dsn }}"
         migrations: ../../data/schemas/
-        folder: ../../data/fixtures/candles
+        folder: ../../data/fixtures/candles/candles
         retry: 10
   - name: Create candles
     steps:
@@ -97,5 +97,5 @@ testcases:
           - result.statuscode ShouldEqual 400
           - result.bodyjson ShouldHaveLength 1
           - result.bodyjson.error ShouldHaveLength 2
-          - result.bodyjson.error.code ShouldEqual 5
+          - result.bodyjson.error.app_code ShouldEqual 5
           - result.bodyjson.error.message ShouldEqual "invalid input, empty candles"

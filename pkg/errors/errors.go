@@ -17,9 +17,9 @@ const (
 )
 
 type AppError struct {
-	Code    AppErrorCode
-	Message string
-	Origin  error
+	Code    AppErrorCode `json:"code"`
+	Message string       `json:"message"`
+	Origin  error        `json:"-"`
 }
 
 func (e AppError) Error() string {
