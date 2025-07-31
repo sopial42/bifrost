@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -54,16 +55,16 @@ func NewLogger(config Config) Logger {
 
 	if config.IsDevelopment {
 		zapConfig = zap.NewDevelopmentConfig()
+		zapConfig.Encoding = "console"
+		zapConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	} else {
 		zapConfig = zap.NewProductionConfig()
+		zapConfig.Encoding = "json"
+		zapConfig.EncoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
+		zapConfig.DisableStacktrace = true
+		zapConfig.DisableCaller = true
 	}
 
-	zapConfig.DisableStacktrace = true
-	zapConfig.DisableCaller = true
-
-	zapConfig.OutputPaths = []string{"stdout"}
-	zapConfig.ErrorOutputPaths = []string{"stderr"}
-	// Set log level
 	switch config.Level {
 	case "debug":
 		zapConfig.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
@@ -81,6 +82,10 @@ func NewLogger(config Config) Logger {
 	return &zapLogger{
 		logger: logger,
 	}
+}
+
+func SetLoggerToContext(ctx context.Context, logger Logger) context.Context {
+	return context.WithValue(ctx, loggerKey, logger)
 }
 
 func SetLoggerMiddlewareEcho(e *echo.Echo, baseLogger Logger) {
