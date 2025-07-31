@@ -2,11 +2,14 @@ package candles
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/uptrace/bun"
 
 	candlesSVC "github.com/bifrost/internal/services/candles"
 	domain "github.com/bifrost/pkg/domains/candles"
+	"github.com/bifrost/pkg/domains/common"
 	"github.com/bifrost/pkg/logger"
 )
 
@@ -40,4 +43,29 @@ func (c *pgPersistence) InsertCandles(ctx context.Context, candles *[]domain.Can
 
 	log.Debugf("Insert done (%d)", len(*candlesDAO))
 	return candlesDAOsToCandlesDetails(ctx, candlesDAO), nil
+}
+
+func (c *pgPersistence) QuerySurroundingDates(ctx context.Context, pair common.Pair, interval common.Interval) (*domain.Date, *domain.Date, error) {
+	var row struct {
+		First *time.Time `bun:"first_date"`
+		Last  *time.Time `bun:"last_date"`
+	}
+
+	query := `
+        SELECT MIN(date) as first_date, MAX(date) as last_date
+        FROM candles
+        WHERE pair = ? AND interval = ?
+    `
+	err := c.clientDB.NewRaw(query, pair, interval).Scan(ctx, &row)
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to query the first and last candle date: %w", err)
+	}
+
+	if row.First == nil || row.Last == nil {
+		return nil, nil, nil
+	}
+
+	firstDate := domain.Date(*row.First)
+	lastDate := domain.Date(*row.Last)
+	return &firstDate, &lastDate, nil
 }

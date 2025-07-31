@@ -14,10 +14,10 @@ import (
 	gommonLog "github.com/labstack/gommon/log"
 
 	persistence "github.com/bifrost/internal/adapters/persistence"
-	
+
 	buySignalsPersistence "github.com/bifrost/internal/adapters/persistence/buySignals"
-	buySignalsSVC "github.com/bifrost/internal/services/buySignals"
 	buySignalsHTTPHandler "github.com/bifrost/internal/adapters/rest/buySignals"
+	buySignalsSVC "github.com/bifrost/internal/services/buySignals"
 
 	candlesPersistence "github.com/bifrost/internal/adapters/persistence/candles"
 	candlesHTTPHandler "github.com/bifrost/internal/adapters/rest/candles"
@@ -32,9 +32,9 @@ import (
 	ratiosSVC "github.com/bifrost/internal/services/ratios"
 
 	"github.com/bifrost/internal/config"
-	"github.com/bifrost/pkg/pinger"
 	"github.com/bifrost/pkg/errors"
 	"github.com/bifrost/pkg/logger"
+	"github.com/bifrost/pkg/pinger"
 )
 
 const pingRoute = "/ping"

@@ -8,6 +8,7 @@ import (
 
 	candlesSVC "github.com/bifrost/internal/services/candles"
 	domain "github.com/bifrost/pkg/domains/candles"
+	"github.com/bifrost/pkg/domains/common"
 	appErrors "github.com/bifrost/pkg/errors"
 )
 
@@ -23,6 +24,7 @@ func SetHandler(e *echo.Echo, service candlesSVC.Service) {
 	apiV1 := e.Group("/api/v1")
 	{
 		apiV1.POST("/candles", p.createcandles)
+		apiV1.GET("/candles/surrounding-dates", p.getSurroundingDates)
 		// apiV1.GET("/candles", p.getcandles)
 	}
 }
@@ -49,26 +51,21 @@ func (p *candlesHandler) createcandles(context echo.Context) error {
 	return context.JSON(http.StatusCreated, candles)
 }
 
-// func (p *candlesHandler) getcandles(context echo.Context) error {
-// 	ctx := context.Request().Context()
-// 	pair := context.QueryParam("pair")
-// 	interval := context.QueryParam("interval")
-// 	startDate := context.QueryParam("start_date")
+func (p *candlesHandler) getSurroundingDates(context echo.Context) error {
+	pair := common.Pair(context.QueryParam("pair"))
+	interval := common.Interval(context.QueryParam("interval"))
 
-// 	// ensure start_date is a valid date
-// 	date, err := time.Parse(time.RFC3339, startDate)
-// 	if err != nil {
-// 		return appErrors.NewInvalidInput("invalid input, start_date is not a valid date", err)
-// 	}
+	if pair == "" || interval == "" {
+		return appErrors.NewInvalidInput("invalid input, pair and interval are required", nil)
+	}
 
-// 	if date.After(time.Now()) {
-// 		return appErrors.NewInvalidInput("invalid input, start_date is in the future", nil)
-// 	}
+	firstDate, lastDate, err := p.candlesSVC.GetSurroundingDates(context.Request().Context(), pair, interval)
+	if err != nil {
+		return fmt.Errorf("unable to get first and last dates: %w", err)
+	}
 
-// 	candles, err := p.candlesSVC.GetCandles(ctx, pair, interval, date)
-// 	if err != nil {
-// 		return fmt.Errorf("unable to get candles: %w", err)
-
-// 	}
-// 	return context.JSON(http.StatusOK, "ok")
-// }
+	return context.JSON(http.StatusOK, map[string]string{
+		"first_date": firstDate.String(),
+		"last_date":  lastDate.String(),
+	})
+}
