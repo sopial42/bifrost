@@ -3,6 +3,7 @@ package candles
 import (
 	"context"
 	"fmt"
+	"time"
 
 	domain "github.com/sopial42/bifrost/pkg/domains/candles"
 	"github.com/sopial42/bifrost/pkg/domains/common"
@@ -38,4 +39,13 @@ func (p *candlesService) GetSurroundingDates(ctx context.Context, pair common.Pa
 		return nil, nil, appErrors.NewNotFound("no candles found for this pair and interval")
 	}
 	return firstDate, lastDate, nil
+}
+
+func (p *candlesService) GetCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time, limit int) (*[]domain.Candle, bool, error) {
+	candles, hasMore, err := p.persistence.QueryCandles(ctx, pair, interval, startDate, limit)
+	if err != nil {
+		return nil, false, fmt.Errorf("unable to get candles: %w", err)
+	}
+
+	return candles, hasMore, nil
 }

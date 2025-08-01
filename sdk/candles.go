@@ -1,26 +1,37 @@
 package sdk
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
+	"strconv"
+	"time"
 
 	"github.com/sopial42/bifrost/pkg/domains/candles"
 	"github.com/sopial42/bifrost/pkg/domains/common"
 	"github.com/sopial42/bifrost/pkg/errors"
+	"github.com/sopial42/bifrost/pkg/logger"
 	"github.com/sopial42/bifrost/pkg/sdk"
 )
 
-const defaultChunckSize = 500
+const defaultCreateCandlesChunckSize = 1000
+const defaultGetCandlesLimit = 1000
 
 type Candles interface {
 	// CreateCandles insert candles in the database, if a candle already exists, it will be ignored
 	// It returns only the newly inserted candles
 	// The candle list is chunked by specified size or defaultChunckSize if set to <= 0
-	CreateCandles(candles *[]candles.Candle, chunckSize int) (*[]candles.Candle, error)
+	CreateCandles(ctx context.Context, candles *[]candles.Candle, chunckSize int) (*[]candles.Candle, error)
 
+	// GetCandles returns candles for a given pair and interval
+	// Use startDate and endDate to filter candles by date
+	// Return a limited count of candles defined by default in the sdk
+	// Return hasMore = true if there are more candles to fetch using the last candle date as startDate
+	GetCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time) (res *[]candles.Candle, hasMore bool, err error)
 	// QuerySurroundingDates returns the first and last candle date for a given pair and interval
 	// It returns 404 not found if no candles are found for the given pair and interval
-	QuerySurroundingDates(pair common.Pair, interval common.Interval) (*candles.Date, *candles.Date, error)
+	QuerySurroundingDates(ctx context.Context, pair common.Pair, interval common.Interval) (*candles.Date, *candles.Date, error)
 }
 
 type client struct {
@@ -28,16 +39,12 @@ type client struct {
 }
 
 func NewCandlesClient(baseURL string) Candles {
-	fmt.Printf("NewCandlesClient %s\n", baseURL)
-	fmt.Printf("NewCandlesClient %s\n", baseURL)
-	fmt.Printf("NewCandlesClient %s\n", baseURL)
-	fmt.Printf("NewCandlesClient %s\n", baseURL)
 	return &client{
 		sdk.NewSDKClient(baseURL),
 	}
 }
 
-func (c *client) CreateCandles(newCandles *[]candles.Candle, chunckSize int) (*[]candles.Candle, error) {
+func (c *client) CreateCandles(ctx context.Context, newCandles *[]candles.Candle, chunckSize int) (*[]candles.Candle, error) {
 	if len(*newCandles) == 0 {
 		return nil, nil
 	}
@@ -45,7 +52,7 @@ func (c *client) CreateCandles(newCandles *[]candles.Candle, chunckSize int) (*[
 	createdCandles := []candles.Candle{}
 	// Chunk the candles list into specified size or 1000 if set to 0
 	if chunckSize <= 0 {
-		chunckSize = defaultChunckSize
+		chunckSize = defaultCreateCandlesChunckSize
 	}
 
 	chuncks := createCandlesChunk(newCandles, chunckSize)
@@ -62,7 +69,7 @@ func (c *client) CreateCandles(newCandles *[]candles.Candle, chunckSize int) (*[
 			return nil, errors.NewUnexpected("failed to marshal candles", err)
 		}
 
-		res, err := c.Post("/candles", body)
+		res, err := c.Post(ctx, "/candles", body)
 		if err != nil {
 			return nil, err
 		}
@@ -70,7 +77,7 @@ func (c *client) CreateCandles(newCandles *[]candles.Candle, chunckSize int) (*[
 		createdCandlesChunk := []candles.Candle{}
 		err = json.Unmarshal(res, &createdCandlesChunk)
 		if err != nil {
-			return nil, errors.NewUnexpected("failed to unmarshal candles: "+string(res), err)
+			return nil, errors.NewUnexpected("failed to unmarshal candles", err)
 		}
 
 		createdCandles = append(createdCandles, createdCandlesChunk...)
@@ -79,10 +86,41 @@ func (c *client) CreateCandles(newCandles *[]candles.Candle, chunckSize int) (*[
 	return &createdCandles, nil
 }
 
-func (c *client) QuerySurroundingDates(pair common.Pair, interval common.Interval) (*candles.Date, *candles.Date, error) {
-	res, err := c.Get("/candles/surrounding-dates?pair=" + string(pair) + "&interval=" + string(interval))
+func (c *client) GetCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time) (*[]candles.Candle, bool, error) {
+	queryValues := url.Values{}
+
+	queryValues.Add("pair", string(pair))
+	queryValues.Add("interval", string(interval))
+	queryValues.Add("limit", strconv.Itoa(defaultGetCandlesLimit))
+
+	if startDate != nil {
+		queryValues.Add("start_date", startDate.Format(time.RFC3339))
+	}
+
+	res, err := c.Get(ctx, "/candles?"+queryValues.Encode())
 	if err != nil {
-		return nil, nil, err
+		return nil, false, fmt.Errorf("failed to get candles: %w", err)
+	}
+
+	candlesResponse := struct {
+		Candles []candles.Candle `json:"candles"`
+		HasMore bool             `json:"has_more"`
+	}{}
+
+	logger.GetLogger(ctx).Debugf("GetCandles response: %s", string(res))
+
+	err = json.Unmarshal(res, &candlesResponse)
+	if err != nil {
+		return nil, false, errors.NewUnexpected("failed to unmarshal GetCandles response", err)
+	}
+
+	return &candlesResponse.Candles, candlesResponse.HasMore, nil
+}
+
+func (c *client) QuerySurroundingDates(ctx context.Context, pair common.Pair, interval common.Interval) (*candles.Date, *candles.Date, error) {
+	res, err := c.Get(ctx, "/candles/surrounding-dates?pair="+string(pair)+"&interval="+string(interval))
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to query surrounding dates: %w", err)
 	}
 
 	surroundingDates := struct {

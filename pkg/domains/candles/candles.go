@@ -30,11 +30,26 @@ func (d *Date) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type ID uuid.UUID
 
 func (i ID) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, uuid.UUID(i).String())), nil
 }
+
+func (i *ID) UnmarshalJSON(b []byte) error {
+	var s string
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+
+	parsed, err := uuid.Parse(s)
+	if err != nil {
+		return err
+	}
+
+	*i = ID(parsed)
+	return nil
+}
+
 
 // String method returns a human-readable date
 func (c Date) String() string {
@@ -44,6 +59,8 @@ func (c Date) String() string {
 func GetDateStrFromUnixTimeMilli(date time.Time) string {
 	return date.In(time.Now().Location()).Format(time.RFC3339)
 }
+
+type ID uuid.UUID
 
 type Candle struct {
 	ID       *ID             `json:"id,omitempty"`

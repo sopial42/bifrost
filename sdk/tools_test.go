@@ -7,7 +7,6 @@ import (
 
 	"github.com/sopial42/bifrost/pkg/domains/candles"
 	"github.com/sopial42/bifrost/pkg/domains/common"
-	"github.com/sopial42/bifrost/pkg/sdk"
 )
 
 func Test_createCandlesChunk(t *testing.T) {
@@ -226,40 +225,6 @@ func Test_createCandlesChunk(t *testing.T) {
 			got := createCandlesChunk(tt.candles, tt.chunkSize)
 			if !reflect.DeepEqual(got, tt.wantChunks) {
 				t.Errorf("createCandlesChunk() = %v, want %v", got, tt.wantChunks)
-			}
-		})
-	}
-}
-
-func Test_client_CreateCandles(t *testing.T) {
-	type fields struct {
-		Client *sdk.Client
-	}
-	type args struct {
-		newCandles *[]candles.Candle
-		chunckSize int
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    *[]candles.Candle
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c := &client{
-				Client: tt.fields.Client,
-			}
-			got, err := c.CreateCandles(tt.args.newCandles, tt.args.chunckSize)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("client.CreateCandles() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("client.CreateCandles() = %v, want %v", got, tt.want)
 			}
 		})
 	}

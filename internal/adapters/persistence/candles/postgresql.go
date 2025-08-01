@@ -45,6 +45,25 @@ func (c *pgPersistence) InsertCandles(ctx context.Context, candles *[]domain.Can
 	return candlesDAOsToCandlesDetails(ctx, candlesDAO), nil
 }
 
+func (c *pgPersistence) QueryCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time, limit int) (*[]domain.Candle, bool, error) {
+	result := []CandleDAO{}
+	request := c.clientDB.NewSelect().Model(&result).
+		Where("pair = ?", pair).
+		Where("interval = ?", interval).
+		OrderExpr("date ASC")
+
+	if startDate != nil && !startDate.IsZero() {
+		request.Where("date >= ?", startDate)
+	}
+
+	err := request.Scan(ctx)
+	if err != nil {
+		return nil, false, fmt.Errorf("unable to perform db query: %v", err)
+	}
+
+	return candlesDAOsToCandlesDetails(ctx, &result), false, nil
+}
+
 func (c *pgPersistence) QuerySurroundingDates(ctx context.Context, pair common.Pair, interval common.Interval) (*domain.Date, *domain.Date, error) {
 	var row struct {
 		First *time.Time `bun:"first_date"`

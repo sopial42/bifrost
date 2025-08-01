@@ -3,6 +3,8 @@ package candles
 import (
 	"fmt"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/labstack/echo/v4"
 
@@ -25,7 +27,7 @@ func SetHandler(e *echo.Echo, service candlesSVC.Service) {
 	{
 		apiV1.POST("/candles", p.createcandles)
 		apiV1.GET("/candles/surrounding-dates", p.getSurroundingDates)
-		// apiV1.GET("/candles", p.getcandles)
+		apiV1.GET("/candles", p.getCandles)
 	}
 }
 
@@ -49,6 +51,46 @@ func (p *candlesHandler) createcandles(context echo.Context) error {
 	}
 
 	return context.JSON(http.StatusCreated, candles)
+}
+
+func (p *candlesHandler) getCandles(context echo.Context) error {
+	ctx := context.Request().Context()
+
+	pair := common.Pair(context.QueryParam("pair"))
+	interval := common.Interval(context.QueryParam("interval"))
+
+	if pair == "" || interval == "" {
+		return appErrors.NewInvalidInput("invalid input, pair and interval are required", nil)
+	}
+
+	limit, err := strconv.Atoi(context.QueryParam("limit"))
+	if err != nil {
+		return appErrors.NewInvalidInput("invalid input, limit is required", err)
+	}
+
+	if limit <= 0 {
+		return appErrors.NewInvalidInput("invalid input, limit must be greater than 0", nil)
+	}
+
+	startDate := context.QueryParam("start_date")
+	if startDate == "" {
+		return appErrors.NewInvalidInput("invalid input, start_date is required", nil)
+	}
+
+	startDateParsed, err := time.Parse(time.RFC3339, startDate)
+	if err != nil {
+		return appErrors.NewInvalidInput("invalid input, start_date is required in RFC3339 format", err)
+	}
+
+	candles, hasMore, err := p.candlesSVC.GetCandles(ctx, pair, interval, &startDateParsed, limit)
+	if err != nil {
+		return fmt.Errorf("unable to get candles: %w", err)
+	}
+
+	return context.JSON(http.StatusOK, map[string]interface{}{
+		"candles":  candles,
+		"has_more": hasMore,
+	})
 }
 
 func (p *candlesHandler) getSurroundingDates(context echo.Context) error {

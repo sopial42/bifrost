@@ -171,6 +171,7 @@ func (l *zapLogger) WithField(key string, value interface{}) Logger {
 	}
 }
 
+// Ensure a key can only be present once in the fields map
 func (l *zapLogger) WithFields(fields map[string]interface{}) Logger {
 	if len(fields) == 0 {
 		return l

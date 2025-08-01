@@ -2,6 +2,7 @@ package sdk
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -45,10 +46,9 @@ func WithTimeout(timeout time.Duration) ClientOption {
 }
 
 // handleResponse reads the response body and converts any error responses to AppErrors
-func (c *Client) handleResponse(res *http.Response) ([]byte, error) {
+func (c *Client) handleResponse(ctx context.Context, res *http.Response) ([]byte, error) {
 	defer res.Body.Close()
 
-	// Read response body
 	respBody, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, errors.NewUnexpected("failed to read response body", err)
@@ -73,20 +73,20 @@ func (c *Client) handleResponse(res *http.Response) ([]byte, error) {
 }
 
 // Post performs a POST request and handles error responses
-func (c *Client) Post(url string, body []byte) ([]byte, error) {
+func (c *Client) Post(ctx context.Context, url string, body []byte) ([]byte, error) {
 	res, err := c.httpClient.Post(c.baseURL+url, "application/json", bytes.NewReader(body))
 	if err != nil {
 		return nil, errors.NewUnexpected("sdk unable to POST request", err)
 	}
 
-	return c.handleResponse(res)
+	return c.handleResponse(ctx, res)
 }
 
-func (c *Client) Get(url string) ([]byte, error) {
+func (c *Client) Get(ctx context.Context, url string) ([]byte, error) {
 	res, err := c.httpClient.Get(c.baseURL + url)
 	if err != nil {
 		return nil, errors.NewUnexpected("sdk unable to GET request", err)
 	}
 
-	return c.handleResponse(res)
+	return c.handleResponse(ctx, res)
 }
