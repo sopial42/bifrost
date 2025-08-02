@@ -25,18 +25,19 @@ func SetHandler(e *echo.Echo, service candlesSVC.Service) {
 
 	apiV1 := e.Group("/api/v1")
 	{
-		apiV1.POST("/candles", p.createcandles)
 		apiV1.GET("/candles/surrounding-dates", p.getSurroundingDates)
 		apiV1.GET("/candles", p.getCandles)
+		apiV1.PATCH("/candles", p.updateCandles)
+		apiV1.POST("/candles", p.createcandles)
 	}
 }
 
-type NewCandleInput struct {
+type CandlesInputRequest struct {
 	Candles []domain.Candle `json:"candles"`
 }
 
 func (p *candlesHandler) createcandles(context echo.Context) error {
-	input := new(NewCandleInput)
+	input := new(CandlesInputRequest)
 	if err := context.Bind(input); err != nil {
 		return appErrors.NewInvalidInput("invalid input", err)
 	}
@@ -110,4 +111,22 @@ func (p *candlesHandler) getSurroundingDates(context echo.Context) error {
 		"first_date": firstDate.String(),
 		"last_date":  lastDate.String(),
 	})
+}
+
+func (p *candlesHandler) updateCandles(context echo.Context) error {
+	input := new(CandlesInputRequest)
+	if err := context.Bind(input); err != nil {
+		return appErrors.NewInvalidInput("invalid input", err)
+	}
+
+	if len(input.Candles) == 0 {
+		return appErrors.NewInvalidInput("invalid input, empty candles", nil)
+	}
+
+	candles, err := p.candlesSVC.UpdateCandles(context.Request().Context(), &input.Candles)
+	if err != nil {
+		return fmt.Errorf("unable to update candles: %w", err)
+	}
+
+	return context.JSON(http.StatusOK, candles)
 }

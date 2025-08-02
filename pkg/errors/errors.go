@@ -8,7 +8,8 @@ import (
 type AppErrorCode int
 
 const (
-	ErrUnexpected AppErrorCode = iota + 1
+	ErrUnknown AppErrorCode = iota
+	ErrUnexpected
 	ErrNotFound
 	ErrUnauthorized
 	ErrForbidden

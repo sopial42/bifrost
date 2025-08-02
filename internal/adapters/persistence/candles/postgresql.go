@@ -88,3 +88,26 @@ func (c *pgPersistence) QuerySurroundingDates(ctx context.Context, pair common.P
 	lastDate := domain.Date(*row.Last)
 	return &firstDate, &lastDate, nil
 }
+
+
+func (c *pgPersistence) UpdateCandles(ctx context.Context, candles *[]domain.Candle) (*[]domain.Candle, error) {
+	log := logger.GetLogger(ctx)
+
+	if candles == nil {
+		return &[]domain.Candle{}, nil
+	}
+
+	candlesDAO := candlesToCandlesDAO(ctx, candles, true)
+	_, err := c.clientDB.NewUpdate().
+		Model(candlesDAO).
+		Returning("*").
+		Model(candlesDAO).
+		Exec(ctx)
+	if err != nil {
+		log.Errorf("Query refused, throw pgError, %v", err)
+		return &[]domain.Candle{}, err
+	}
+
+	log.Debugf("Update done (%d)", len(*candlesDAO))
+	return candlesDAOsToCandlesDetails(ctx, candlesDAO), nil
+}

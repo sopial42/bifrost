@@ -11,7 +11,6 @@ import (
 	"github.com/sopial42/bifrost/pkg/domains/candles"
 	"github.com/sopial42/bifrost/pkg/domains/common"
 	"github.com/sopial42/bifrost/pkg/errors"
-	"github.com/sopial42/bifrost/pkg/logger"
 	"github.com/sopial42/bifrost/pkg/sdk"
 )
 
@@ -106,8 +105,6 @@ func (c *client) GetCandles(ctx context.Context, pair common.Pair, interval comm
 		Candles []candles.Candle `json:"candles"`
 		HasMore bool             `json:"has_more"`
 	}{}
-
-	logger.GetLogger(ctx).Debugf("GetCandles response: %s", string(res))
 
 	err = json.Unmarshal(res, &candlesResponse)
 	if err != nil {

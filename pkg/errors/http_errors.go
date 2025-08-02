@@ -9,10 +9,10 @@ import (
 )
 
 type ErrResponse struct {
-	Error Details `json:"error"`
+	Error ErrDetails `json:"error"`
 }
 
-type Details struct {
+type ErrDetails struct {
 	AppCode AppErrorCode `json:"app_code"`
 	Message string       `json:"message"`
 	TraceID string       `json:"trace_id,omitempty"`
@@ -20,7 +20,7 @@ type Details struct {
 }
 
 var unexpectedErrMessage = ErrResponse{
-	Error: Details{
+	Error: ErrDetails{
 		AppCode: ErrUnexpected,
 		Message: "internal server error",
 	},
@@ -40,7 +40,7 @@ var ErrorsHandler = func(err error, ctx echo.Context) {
 	if errors.As(err, &appErr) {
 		log.Debugf("AppError: %v", appErr)
 		errResponse := ErrResponse{
-			Error: Details{
+			Error: ErrDetails{
 				AppCode: appErr.Code,
 				Message: appErr.Message,
 				Origin:  appErr.Origin,
@@ -67,7 +67,7 @@ var ErrorsHandler = func(err error, ctx echo.Context) {
 
 			log.Err(err).Debugf("HTTP error")
 			errResponse := ErrResponse{
-				Error: Details{
+				Error: ErrDetails{
 					Message: msgStr,
 				},
 			}

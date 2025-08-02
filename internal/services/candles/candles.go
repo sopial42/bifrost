@@ -49,3 +49,12 @@ func (p *candlesService) GetCandles(ctx context.Context, pair common.Pair, inter
 
 	return candles, hasMore, nil
 }
+
+func (p *candlesService) UpdateCandles(ctx context.Context, candles *[]domain.Candle) (*[]domain.Candle, error) {
+	candles, err := p.persistence.UpdateCandles(ctx, candles)
+	if err != nil {
+		return &[]domain.Candle{}, fmt.Errorf("unable to update candles: %w", err)
+	}
+
+	return candles, nil
+}

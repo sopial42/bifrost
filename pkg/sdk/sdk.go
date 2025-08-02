@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/sopial42/bifrost/pkg/errors"
+	appErrors "github.com/sopial42/bifrost/pkg/errors"
 )
 
 type Client struct {
@@ -51,7 +51,7 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response) ([]byte
 
 	respBody, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, errors.NewUnexpected("failed to read response body", err)
+		return nil, appErrors.NewUnexpected("failed to read response body", err)
 	}
 
 	// If status code indicates success, return the body
@@ -59,24 +59,24 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response) ([]byte
 		return respBody, nil
 	}
 
-	var errResp errors.ErrResponse
-	if err := json.Unmarshal(respBody, &errResp); err != nil {
-		// If we can't parse the error response, use the raw body as message
-		errResp.Error.Message = string(respBody)
-		return nil, errors.NewUnexpected("failed to unmarshal error response", err)
+	var appErr appErrors.AppError
+	if err := json.Unmarshal(respBody, &appErr); err != nil {
+		return nil, appErrors.NewUnexpected("failed to handle error response", err)
 	}
 
-	return nil, errors.AppError{
-		Code:    errResp.Error.AppCode,
-		Message: errResp.Error.Message,
+	if appErr.Code == appErrors.ErrUnknown {
+		appErr.Code = appErrors.ErrUnexpected
+		appErr.Message = string(respBody)
 	}
+
+	return nil, appErr
 }
 
 // Post performs a POST request and handles error responses
 func (c *Client) Post(ctx context.Context, url string, body []byte) ([]byte, error) {
 	res, err := c.httpClient.Post(c.baseURL+url, "application/json", bytes.NewReader(body))
 	if err != nil {
-		return nil, errors.NewUnexpected("sdk unable to POST request", err)
+		return nil, appErrors.NewUnexpected("sdk unable to POST request", err)
 	}
 
 	return c.handleResponse(ctx, res)
@@ -85,7 +85,7 @@ func (c *Client) Post(ctx context.Context, url string, body []byte) ([]byte, err
 func (c *Client) Get(ctx context.Context, url string) ([]byte, error) {
 	res, err := c.httpClient.Get(c.baseURL + url)
 	if err != nil {
-		return nil, errors.NewUnexpected("sdk unable to GET request", err)
+		return nil, appErrors.NewUnexpected("sdk unable to GET request", err)
 	}
 
 	return c.handleResponse(ctx, res)
