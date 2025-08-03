@@ -41,17 +41,17 @@ func (p *candlesService) GetSurroundingDates(ctx context.Context, pair common.Pa
 	return firstDate, lastDate, nil
 }
 
-func (p *candlesService) GetCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time, limit int) (*[]domain.Candle, bool, error) {
-	candles, hasMore, err := p.persistence.QueryCandles(ctx, pair, interval, startDate, limit)
+func (p *candlesService) GetCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time, limit int) (*[]domain.Candle, bool, *time.Time, error) {
+	candles, hasMore, nextCursor, err := p.persistence.QueryCandles(ctx, pair, interval, startDate, limit)
 	if err != nil {
-		return nil, false, fmt.Errorf("unable to get candles: %w", err)
+		return nil, false, nil, fmt.Errorf("unable to get candles: %w", err)
 	}
 
-	return candles, hasMore, nil
+	return candles, hasMore, nextCursor, nil
 }
 
-func (p *candlesService) UpdateCandles(ctx context.Context, candles *[]domain.Candle) (*[]domain.Candle, error) {
-	candles, err := p.persistence.UpdateCandles(ctx, candles)
+func (p *candlesService) UpdateCandlesRSI(ctx context.Context, candles *[]domain.Candle) (*[]domain.Candle, error) {
+	candles, err := p.persistence.UpdateCandlesRSI(ctx, candles)
 	if err != nil {
 		return &[]domain.Candle{}, fmt.Errorf("unable to update candles: %w", err)
 	}

@@ -27,7 +27,7 @@ func SetHandler(e *echo.Echo, service candlesSVC.Service) {
 	{
 		apiV1.GET("/candles/surrounding-dates", p.getSurroundingDates)
 		apiV1.GET("/candles", p.getCandles)
-		apiV1.PATCH("/candles", p.updateCandles)
+		apiV1.PATCH("/candles_rsi", p.updateCandlesRSI)
 		apiV1.POST("/candles", p.createcandles)
 	}
 }
@@ -54,9 +54,14 @@ func (p *candlesHandler) createcandles(context echo.Context) error {
 	return context.JSON(http.StatusCreated, candles)
 }
 
+type getCandleResponse struct {
+	Candles    *[]domain.Candle `json:"candles"`
+	HasMore    bool             `json:"has_more"`
+	NextCursor *time.Time       `json:"next_cursor,omitempty"`
+}
+
 func (p *candlesHandler) getCandles(context echo.Context) error {
 	ctx := context.Request().Context()
-
 	pair := common.Pair(context.QueryParam("pair"))
 	interval := common.Interval(context.QueryParam("interval"))
 
@@ -64,33 +69,39 @@ func (p *candlesHandler) getCandles(context echo.Context) error {
 		return appErrors.NewInvalidInput("invalid input, pair and interval are required", nil)
 	}
 
-	limit, err := strconv.Atoi(context.QueryParam("limit"))
-	if err != nil {
-		return appErrors.NewInvalidInput("invalid input, limit is required", err)
+	var limit int
+	var err error
+	limitParam := context.QueryParam("limit")
+	if limitParam == "" {
+		limit = 0
+	} else {
+		limit, err = strconv.Atoi(limitParam)
+		if err != nil {
+			return appErrors.NewInvalidInput("invalid limit input, must be an integer", err)
+		}
 	}
 
-	if limit <= 0 {
-		return appErrors.NewInvalidInput("invalid input, limit must be greater than 0", nil)
+	var startDate *time.Time
+	startDateArg := context.QueryParam("start_date")
+	if startDateArg == "" {
+		startDate = nil
+	} else {
+		startDateParsed, err := time.Parse(time.RFC3339, startDateArg)
+		if err != nil {
+			return appErrors.NewInvalidInput("invalid input, start_date is required in RFC3339 format", err)
+		}
+		startDate = &startDateParsed
 	}
 
-	startDate := context.QueryParam("start_date")
-	if startDate == "" {
-		return appErrors.NewInvalidInput("invalid input, start_date is required", nil)
-	}
-
-	startDateParsed, err := time.Parse(time.RFC3339, startDate)
-	if err != nil {
-		return appErrors.NewInvalidInput("invalid input, start_date is required in RFC3339 format", err)
-	}
-
-	candles, hasMore, err := p.candlesSVC.GetCandles(ctx, pair, interval, &startDateParsed, limit)
+	candles, hasMore, nextCursor, err := p.candlesSVC.GetCandles(ctx, pair, interval, startDate, limit)
 	if err != nil {
 		return fmt.Errorf("unable to get candles: %w", err)
 	}
 
-	return context.JSON(http.StatusOK, map[string]interface{}{
-		"candles":  candles,
-		"has_more": hasMore,
+	return context.JSON(http.StatusOK, getCandleResponse{
+		Candles:    candles,
+		HasMore:    hasMore,
+		NextCursor: nextCursor,
 	})
 }
 
@@ -113,8 +124,10 @@ func (p *candlesHandler) getSurroundingDates(context echo.Context) error {
 	})
 }
 
-func (p *candlesHandler) updateCandles(context echo.Context) error {
+func (p *candlesHandler) updateCandlesRSI(context echo.Context) error {
+	ctx := context.Request().Context()
 	input := new(CandlesInputRequest)
+
 	if err := context.Bind(input); err != nil {
 		return appErrors.NewInvalidInput("invalid input", err)
 	}
@@ -123,7 +136,7 @@ func (p *candlesHandler) updateCandles(context echo.Context) error {
 		return appErrors.NewInvalidInput("invalid input, empty candles", nil)
 	}
 
-	candles, err := p.candlesSVC.UpdateCandles(context.Request().Context(), &input.Candles)
+	candles, err := p.candlesSVC.UpdateCandlesRSI(ctx, &input.Candles)
 	if err != nil {
 		return fmt.Errorf("unable to update candles: %w", err)
 	}

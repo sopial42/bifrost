@@ -45,7 +45,7 @@ func (c *pgPersistence) InsertCandles(ctx context.Context, candles *[]domain.Can
 	return candlesDAOsToCandlesDetails(ctx, candlesDAO), nil
 }
 
-func (c *pgPersistence) QueryCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time, limit int) (*[]domain.Candle, bool, error) {
+func (c *pgPersistence) QueryCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time, limit int) (*[]domain.Candle, bool, *time.Time, error) {
 	result := []CandleDAO{}
 	request := c.clientDB.NewSelect().Model(&result).
 		Where("pair = ?", pair).
@@ -56,12 +56,27 @@ func (c *pgPersistence) QueryCandles(ctx context.Context, pair common.Pair, inte
 		request.Where("date >= ?", startDate)
 	}
 
-	err := request.Scan(ctx)
-	if err != nil {
-		return nil, false, fmt.Errorf("unable to perform db query: %v", err)
+	if limit > 0 {
+		request.Limit(limit + 1)
 	}
 
-	return candlesDAOsToCandlesDetails(ctx, &result), false, nil
+	err := request.Scan(ctx)
+	if err != nil {
+		return nil, false, nil, fmt.Errorf("unable to perform db query: %v", err)
+	}
+
+	if limit <= 0 {
+		return candlesDAOsToCandlesDetails(ctx, &result), false, nil, nil
+	}
+
+	hasMore := len(result) > limit
+	var nextCursor *time.Time
+	if hasMore {
+		nextCursor = &result[len(result)-1].Date
+		result = result[:limit]
+	}
+
+	return candlesDAOsToCandlesDetails(ctx, &result), hasMore, nextCursor, nil
 }
 
 func (c *pgPersistence) QuerySurroundingDates(ctx context.Context, pair common.Pair, interval common.Interval) (*domain.Date, *domain.Date, error) {
@@ -89,8 +104,7 @@ func (c *pgPersistence) QuerySurroundingDates(ctx context.Context, pair common.P
 	return &firstDate, &lastDate, nil
 }
 
-
-func (c *pgPersistence) UpdateCandles(ctx context.Context, candles *[]domain.Candle) (*[]domain.Candle, error) {
+func (c *pgPersistence) UpdateCandlesRSI(ctx context.Context, candles *[]domain.Candle) (*[]domain.Candle, error) {
 	log := logger.GetLogger(ctx)
 
 	if candles == nil {
@@ -98,16 +112,16 @@ func (c *pgPersistence) UpdateCandles(ctx context.Context, candles *[]domain.Can
 	}
 
 	candlesDAO := candlesToCandlesDAO(ctx, candles, true)
-	_, err := c.clientDB.NewUpdate().
+	err := c.clientDB.NewUpdate().
 		Model(candlesDAO).
-		Returning("*").
-		Model(candlesDAO).
-		Exec(ctx)
+		Column("rsi").
+		Bulk().
+		Returning("candle_dao.*").
+		Scan(ctx)
 	if err != nil {
 		log.Errorf("Query refused, throw pgError, %v", err)
 		return &[]domain.Candle{}, err
 	}
 
-	log.Debugf("Update done (%d)", len(*candlesDAO))
 	return candlesDAOsToCandlesDetails(ctx, candlesDAO), nil
 }

@@ -26,8 +26,9 @@ type Candles interface {
 	// GetCandles returns candles for a given pair and interval
 	// Use startDate and endDate to filter candles by date
 	// Return a limited count of candles defined by default in the sdk
-	// Return hasMore = true if there are more candles to fetch using the last candle date as startDate
-	GetCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time) (res *[]candles.Candle, hasMore bool, err error)
+	// Return hasMore = true if there are more candles to fetch using nextCursor
+	// Return nextCursor = the last candle date if there are more candles to fetch
+	GetCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time) (res *[]candles.Candle, hasMore bool, nextCursor *time.Time, err error)
 	// QuerySurroundingDates returns the first and last candle date for a given pair and interval
 	// It returns 404 not found if no candles are found for the given pair and interval
 	QuerySurroundingDates(ctx context.Context, pair common.Pair, interval common.Interval) (*candles.Date, *candles.Date, error)
@@ -85,7 +86,7 @@ func (c *client) CreateCandles(ctx context.Context, newCandles *[]candles.Candle
 	return &createdCandles, nil
 }
 
-func (c *client) GetCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time) (*[]candles.Candle, bool, error) {
+func (c *client) GetCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time) (*[]candles.Candle, bool, *time.Time, error) {
 	queryValues := url.Values{}
 
 	queryValues.Add("pair", string(pair))
@@ -98,20 +99,21 @@ func (c *client) GetCandles(ctx context.Context, pair common.Pair, interval comm
 
 	res, err := c.Get(ctx, "/candles?"+queryValues.Encode())
 	if err != nil {
-		return nil, false, fmt.Errorf("failed to get candles: %w", err)
+		return nil, false, nil, fmt.Errorf("failed to get candles: %w", err)
 	}
 
 	candlesResponse := struct {
-		Candles []candles.Candle `json:"candles"`
-		HasMore bool             `json:"has_more"`
+		Candles    []candles.Candle `json:"candles"`
+		HasMore    bool             `json:"has_more"`
+		NextCursor *time.Time       `json:"next_cursor"`
 	}{}
 
 	err = json.Unmarshal(res, &candlesResponse)
 	if err != nil {
-		return nil, false, errors.NewUnexpected("failed to unmarshal GetCandles response", err)
+		return nil, false, nil, errors.NewUnexpected("failed to unmarshal GetCandles response", err)
 	}
 
-	return &candlesResponse.Candles, candlesResponse.HasMore, nil
+	return &candlesResponse.Candles, candlesResponse.HasMore, candlesResponse.NextCursor, nil
 }
 
 func (c *client) QuerySurroundingDates(ctx context.Context, pair common.Pair, interval common.Interval) (*candles.Date, *candles.Date, error) {

@@ -1,0 +1,26 @@
+- id: 83e98bf6-aa44-48df-b86a-5ad84b02295a
+  date: 2024-02-08 00:00:00+0000
+  pair: BTCUSDT
+  interval: 4h
+  open: 44349.6
+  close: 44540.99
+  high: 44780
+  low: 44331.1
+
+- id: cd211a52-42a7-47b2-bb09-f0119e70bf57
+  date: 2024-02-08 04:00:00+0000
+  pair: BTCUSDT
+  interval: 4h
+  open: 44540.98
+  close: 44513.24
+  high: 44633.78
+  low: 44427.01
+
+- id: 2f50ef06-0d72-4f28-8242-a1ad82d134db
+  date: 2024-02-08 08:00:00+0000
+  pair: BTCUSDT
+  interval: 4h
+  open: 44513.25
+  close: 44698.97
+  high: 44885
+  low: 44513.24

@@ -33,7 +33,6 @@ func candlesToCandlesDAO(ctx context.Context, candles *[]domain.Candle, isUpdate
 		return nil
 	}
 
-	log.Debugf("candles: %v", candles)
 	res := make([]CandleDAO, len(*candles))
 	for i, c := range *candles {
 		res[i] = CandleDAO{
@@ -63,6 +62,8 @@ func candlesToCandlesDAO(ctx context.Context, candles *[]domain.Candle, isUpdate
 				continue
 			}
 
+			var msgg json.RawMessage
+			res[i].RSI = &msgg
 			*res[i].RSI = msg
 		}
 	}

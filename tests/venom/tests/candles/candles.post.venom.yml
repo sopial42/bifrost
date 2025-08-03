@@ -8,7 +8,7 @@ testcases:
         database: postgres
         dsn: "{{ .pgsql_dsn }}"
         migrations: ../../data/schemas/
-        folder: ../../data/fixtures/candles/candles
+        folder: ../../data/fixtures/candles/post
         retry: 10
   - name: Create candles
     steps:
