@@ -11,6 +11,7 @@ import (
 	"github.com/sopial42/bifrost/pkg/domains/candles"
 	"github.com/sopial42/bifrost/pkg/domains/common"
 	"github.com/sopial42/bifrost/pkg/errors"
+	"github.com/sopial42/bifrost/pkg/logger"
 	"github.com/sopial42/bifrost/pkg/sdk"
 )
 
@@ -29,6 +30,11 @@ type Candles interface {
 	// Return hasMore = true if there are more candles to fetch using nextCursor
 	// Return nextCursor = the last candle date if there are more candles to fetch
 	GetCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time) (res *[]candles.Candle, hasMore bool, nextCursor *time.Time, err error)
+
+	// UpdateCandleListRSI updates only the RSI for a list of candles
+	// It returns the updated candles
+	UpdateCandleListRSI(ctx context.Context, candles *[]candles.Candle) (*[]candles.Candle, error)
+
 	// QuerySurroundingDates returns the first and last candle date for a given pair and interval
 	// It returns 404 not found if no candles are found for the given pair and interval
 	QuerySurroundingDates(ctx context.Context, pair common.Pair, interval common.Interval) (*candles.Date, *candles.Date, error)
@@ -45,7 +51,7 @@ func NewCandlesClient(baseURL string) Candles {
 }
 
 func (c *client) CreateCandles(ctx context.Context, newCandles *[]candles.Candle, chunckSize int) (*[]candles.Candle, error) {
-	if len(*newCandles) == 0 {
+	if newCandles == nil || len(*newCandles) == 0 {
 		return nil, nil
 	}
 
@@ -77,13 +83,54 @@ func (c *client) CreateCandles(ctx context.Context, newCandles *[]candles.Candle
 		createdCandlesChunk := []candles.Candle{}
 		err = json.Unmarshal(res, &createdCandlesChunk)
 		if err != nil {
-			return nil, errors.NewUnexpected("failed to unmarshal candles", err)
+			return nil, errors.NewUnexpected("create failed to unmarshal candles while createChunck", err)
 		}
 
 		createdCandles = append(createdCandles, createdCandlesChunk...)
 	}
 
 	return &createdCandles, nil
+}
+
+func (c *client) UpdateCandleListRSI(ctx context.Context, candlesRSIs *[]candles.Candle) (*[]candles.Candle, error) {
+	if candlesRSIs == nil || len(*candlesRSIs) == 0 {
+		return nil, nil
+	}
+
+	updatedCandles := []candles.Candle{}
+	chuncks := createCandlesChunk(candlesRSIs, defaultCreateCandlesChunckSize)
+	if chuncks == nil {
+		return nil, nil
+	}
+
+	for _, chunk := range *chuncks {
+		input := map[string]interface{}{
+			"candles": chunk,
+		}
+		body, err := json.Marshal(input)
+		if err != nil {
+			return nil, errors.NewUnexpected("failed to marshal candles", err)
+		}
+
+		res, err := c.Patch(ctx, "/candles/rsi", body)
+		if err != nil {
+			return nil, err
+		}
+
+		patchResponse := struct {
+			Candles []candles.Candle `json:"candles"`
+		}{}
+
+		err = json.Unmarshal(res, &patchResponse)
+		if err != nil {
+			logger.GetLogger(ctx).Errorf("update candle list RSI failed to unmarshal PATCH response: %v", err)
+			return nil, errors.NewUnexpected("update failed to unmarshal while create a chunck of candles", err)
+		}
+
+		updatedCandles = append(updatedCandles, patchResponse.Candles...)
+	}
+
+	return &updatedCandles, nil
 }
 
 func (c *client) GetCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time) (*[]candles.Candle, bool, *time.Time, error) {

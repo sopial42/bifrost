@@ -27,8 +27,8 @@ func SetHandler(e *echo.Echo, service candlesSVC.Service) {
 	{
 		apiV1.GET("/candles/surrounding-dates", p.getSurroundingDates)
 		apiV1.GET("/candles", p.getCandles)
-		apiV1.PATCH("/candles_rsi", p.updateCandlesRSI)
 		apiV1.POST("/candles", p.createcandles)
+		apiV1.PATCH("/candles/rsi", p.updateCandlesRSI)
 	}
 }
 
@@ -141,5 +141,7 @@ func (p *candlesHandler) updateCandlesRSI(context echo.Context) error {
 		return fmt.Errorf("unable to update candles: %w", err)
 	}
 
-	return context.JSON(http.StatusOK, candles)
+	return context.JSON(http.StatusOK, map[string]interface{}{
+		"candles": candles,
+	})
 }

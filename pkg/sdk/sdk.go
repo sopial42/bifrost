@@ -72,6 +72,22 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response) ([]byte
 	return nil, appErr
 }
 
+// Patch performs a PATCH request and handles error responses
+func (c *Client) Patch(ctx context.Context, url string, body []byte) ([]byte, error) {
+	req, err := http.NewRequest("PATCH", c.baseURL+url, bytes.NewReader(body))
+	if err != nil {
+		return nil, appErrors.NewUnexpected("sdk unable to create PATCH request", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, appErrors.NewUnexpected("sdk unable to PATCH request", err)
+	}
+
+	return c.handleResponse(ctx, res)
+}
+
 // Post performs a POST request and handles error responses
 func (c *Client) Post(ctx context.Context, url string, body []byte) ([]byte, error) {
 	res, err := c.httpClient.Post(c.baseURL+url, "application/json", bytes.NewReader(body))
