@@ -1,16 +1,14 @@
 package sdk
 
-import "github.com/sopial42/bifrost/pkg/domains/candles"
+func createChunk[T any](newElements *[]T, chunckSize int) *[][]T {
+	var chuncks [][]T
 
-func createCandlesChunk(newCandles *[]candles.Candle, chunckSize int) *[][]candles.Candle {
-	var chuncks [][]candles.Candle
-
-	if newCandles == nil {
+	if newElements == nil || len(*newElements) == 0 {
 		return nil
 	}
 
-	for i := 0; i < len(*newCandles); i += chunckSize {
-		chunk := (*newCandles)[i:min(i+chunckSize, len(*newCandles))]
+	for i := 0; i < len(*newElements); i += chunckSize {
+		chunk := (*newElements)[i:min(i+chunckSize, len(*newElements))]
 		chuncks = append(chuncks, chunk)
 	}
 

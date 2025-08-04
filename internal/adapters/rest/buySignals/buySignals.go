@@ -23,7 +23,7 @@ func SetHandler(e *echo.Echo, service buySignalsSVC.Service) {
 
 	apiV1 := e.Group("/api/v1")
 	{
-		apiV1.POST("/buySignals", p.createBuySignals)
+		apiV1.POST("/buy_signals", p.createBuySignals)
 	}
 }
 
@@ -69,5 +69,7 @@ func (p *buySignalsHandler) createBuySignals(context echo.Context) error {
 		return appErrors.NewUnexpected("unable to create buySignals", err)
 	}
 
-	return context.JSON(http.StatusCreated, buySignals)
+	return context.JSON(http.StatusCreated, map[string]any{
+		"buy_signals": buySignals,
+	})
 }

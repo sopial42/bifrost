@@ -10,7 +10,7 @@ import (
 
 type Details struct {
 	Name       Name           `json:"name"`
-	ID         ID             `json:"id"`
+	ID         *ID            `json:"id,omitempty"`
 	BusinessID BusinessID     `json:"business_id"`
 	Fullname   Fullname       `json:"fullname"`
 	Pair       common.Pair    `json:"pair"`

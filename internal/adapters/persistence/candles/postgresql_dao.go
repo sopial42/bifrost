@@ -36,7 +36,6 @@ func candlesToCandlesDAO(ctx context.Context, candles *[]domain.Candle, isUpdate
 	res := make([]CandleDAO, len(*candles))
 	for i, c := range *candles {
 		res[i] = CandleDAO{
-			ID:       uuid.New(),
 			Date:     time.Time(c.Date),
 			Pair:     c.Pair.String(),
 			Interval: c.Interval.String(),
@@ -53,6 +52,8 @@ func candlesToCandlesDAO(ctx context.Context, candles *[]domain.Candle, isUpdate
 			}
 
 			res[i].ID = uuid.UUID(*c.ID)
+		} else {
+			res[i].ID = uuid.New()
 		}
 
 		if c.RSI != nil {

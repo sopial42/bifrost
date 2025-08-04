@@ -1,6 +1,7 @@
 package buysignals
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -8,6 +9,7 @@ import (
 
 	domain "github.com/sopial42/bifrost/pkg/domains/buySignals"
 	"github.com/sopial42/bifrost/pkg/domains/common"
+	"github.com/sopial42/bifrost/pkg/logger"
 )
 
 type BuySignalDAO struct {
@@ -23,12 +25,13 @@ type BuySignalDAO struct {
 	Metadata   map[string]any `bun:"metadata,type:jsonb,nullzero"`
 }
 
-func buySignalDetailsToBuySignalDAOs(buySignals *[]domain.Details) []BuySignalDAO {
+func buySignalDetailsToBuySignalDAOs(ctx context.Context, buySignals *[]domain.Details, isUpdate bool) []BuySignalDAO {
+	log := logger.GetLogger(ctx)
+
 	buySignalsDAO := make([]BuySignalDAO, len(*buySignals))
 
 	for i, bs := range *buySignals {
 		buySignalsDAO[i] = BuySignalDAO{
-			ID:         uuid.UUID(bs.ID),
 			BusinessID: domain.BusinessID(bs.BusinessID),
 			Name:       domain.Name(bs.Name),
 			Fullname:   domain.Fullname(bs.Fullname),
@@ -37,17 +40,35 @@ func buySignalDetailsToBuySignalDAOs(buySignals *[]domain.Details) []BuySignalDA
 			Price:      bs.Price,
 			Metadata:   bs.Metadata,
 		}
+
+		if isUpdate {
+			if bs.ID == nil {
+				log.Warnf("unable to update buy signal as ID is nil: %+v", bs)
+				continue
+			}
+
+			buySignalsDAO[i].ID = uuid.UUID(*bs.ID)
+		} else {
+			buySignalsDAO[i].ID = uuid.New()
+		}
 	}
 
 	return buySignalsDAO
 }
 
-func buySignalDAOsToBuySignalDetails(buySignalsDAO []BuySignalDAO) *[]domain.Details {
+func buySignalDAOsToBuySignalDetails(ctx context.Context, buySignalsDAO []BuySignalDAO) *[]domain.Details {
+	log := logger.GetLogger(ctx)
 	buySignals := make([]domain.Details, len(buySignalsDAO))
 
 	for i, bs := range buySignalsDAO {
+		if bs.ID == uuid.Nil {
+			log.Warnf("unable to convert buy signal as ID is nil: %+v", bs)
+			continue
+		}
+
+		id := domain.ID(bs.ID)
 		buySignals[i] = domain.Details{
-			ID:         domain.ID(bs.ID),
+			ID:         &id,
 			BusinessID: domain.BusinessID(bs.BusinessID),
 			Name:       domain.Name(bs.Name),
 			Fullname:   domain.Fullname(bs.Fullname),

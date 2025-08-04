@@ -59,8 +59,9 @@ func ratiosDAOsToRatiosDetails(ratiosDAO []RatioDAO) (*[]domain.Ratio, error) {
 			}
 
 			if r.Position.BuySignal != nil {
+				id := buySignals.ID(r.Position.BuySignal.ID)
 				ratiosDetails[i].Position.BuySignal = &buySignals.Details{
-					ID:         buySignals.ID(r.Position.BuySignal.ID),
+					ID:         &id,
 					BusinessID: buySignals.BusinessID(r.Position.BuySignal.BusinessID),
 					Pair:       common.Pair(r.Position.BuySignal.Pair),
 					Name:       buySignals.Name(r.Position.BuySignal.Name),

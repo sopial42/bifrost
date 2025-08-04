@@ -26,7 +26,7 @@ func (c *pgPersistence) InsertBuySignals(ctx context.Context, bsReports *[]domai
 		return &[]domain.Details{}, nil
 	}
 
-	buySignalsDAO := buySignalDetailsToBuySignalDAOs(bsReports)
+	buySignalsDAO := buySignalDetailsToBuySignalDAOs(ctx, bsReports, false)
 	_, err := c.clientDB.
 		NewInsert().
 		Model(&buySignalsDAO).
@@ -41,7 +41,7 @@ func (c *pgPersistence) InsertBuySignals(ctx context.Context, bsReports *[]domai
 		return &[]domain.Details{}, err
 	}
 
-	res := buySignalDAOsToBuySignalDetails(buySignalsDAO)
+	res := buySignalDAOsToBuySignalDetails(ctx, buySignalsDAO)
 	log.Debugf("Insert buySignals done")
 	return res, nil
 }

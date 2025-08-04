@@ -14,7 +14,7 @@ testcases:
     steps:
       - type: http
         method: PATCH
-        url: "{{.url}}/candles_rsi"
+        url: "{{.url}}/candles/rsi"
         headers:
           Content-Type: application/json
         body: |
@@ -32,17 +32,17 @@ testcases:
         assertions:
           - result.statuscode ShouldEqual 200
           - result.bodyjson ShouldHaveLength 1
-          - result.bodyjson.bodyjson0 ShouldHaveLength 9
-          - result.bodyjson.bodyjson0.id ShouldHaveLength 36
-          - result.bodyjson.bodyjson0.date ShouldEqual 2024-02-08T00:00:00Z
-          - result.bodyjson.bodyjson0.pair ShouldEqual BTCUSDT
-          - result.bodyjson.bodyjson0.interval ShouldEqual 4h
-          - result.bodyjson.bodyjson0.open ShouldEqual 44349.6
-          - result.bodyjson.bodyjson0.close ShouldEqual 44540.99
-          - result.bodyjson.bodyjson0.high ShouldEqual 44780
-          - result.bodyjson.bodyjson0.low ShouldEqual 44331.1
-          - result.bodyjson.bodyjson0.rsi ShouldHaveLength 1
-          - result.bodyjson.bodyjson0.rsi.50 ShouldEqual 50.3
+          - result.bodyjson.candles.candles0 ShouldHaveLength 9
+          - result.bodyjson.candles.candles0.id ShouldHaveLength 36
+          - result.bodyjson.candles.candles0.date ShouldEqual 2024-02-08T00:00:00Z
+          - result.bodyjson.candles.candles0.pair ShouldEqual BTCUSDT
+          - result.bodyjson.candles.candles0.interval ShouldEqual 4h
+          - result.bodyjson.candles.candles0.open ShouldEqual 44349.6
+          - result.bodyjson.candles.candles0.close ShouldEqual 44540.99
+          - result.bodyjson.candles.candles0.high ShouldEqual 44780
+          - result.bodyjson.candles.candles0.low ShouldEqual 44331.1
+          - result.bodyjson.candles.candles0.rsi ShouldHaveLength 1
+          - result.bodyjson.candles.candles0.rsi.50 ShouldEqual 50.3
       - name: Get all candles to check only one RSI changed
         type: http
         method: GET
@@ -57,5 +57,3 @@ testcases:
           - result.bodyjson.candles.candles1.rsi ShouldBeNil
           - result.bodyjson.candles.candles2 ShouldHaveLength 8
           - result.bodyjson.candles.candles1.rsi ShouldBeNil
-
-

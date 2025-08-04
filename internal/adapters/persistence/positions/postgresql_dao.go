@@ -69,8 +69,9 @@ func positionDAOsToPositionDetails(positionsDAO []PositionDAO) (*[]positions.Det
 		}
 
 		if p.BuySignal != nil {
+			id := bsDomain.ID(p.BuySignalID)
 			bs := &bsDomain.Details{
-				ID:       bsDomain.ID(p.BuySignalID),
+				ID:       &id,
 				Pair:     p.BuySignal.Pair,
 				Date:     bsDomain.Date(p.BuySignal.Date),
 				Name:     p.BuySignal.Name,

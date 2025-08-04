@@ -50,7 +50,7 @@ func (c *client) CreateCandles(ctx context.Context, newCandles *[]candles.Candle
 		chunckSize = defaultCreateCandlesChunckSize
 	}
 
-	chuncks := createCandlesChunk(newCandles, chunckSize)
+	chuncks := createChunk(newCandles, chunckSize)
 	if chuncks == nil {
 		return nil, nil
 	}
@@ -87,7 +87,7 @@ func (c *client) UpdateCandleListRSI(ctx context.Context, candlesRSIs *[]candles
 	}
 
 	updatedCandles := []candles.Candle{}
-	chuncks := createCandlesChunk(candlesRSIs, defaultCreateCandlesChunckSize)
+	chuncks := createChunk(candlesRSIs, defaultCreateCandlesChunckSize)
 	if chuncks == nil {
 		return nil, nil
 	}

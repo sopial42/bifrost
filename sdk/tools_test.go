@@ -216,15 +216,15 @@ func Test_createCandlesChunk(t *testing.T) {
 			name:       "empty input",
 			candles:    &[]candles.Candle{},
 			chunkSize:  1,
-			wantChunks: &[][]candles.Candle{},
+			wantChunks: nil,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := createCandlesChunk(tt.candles, tt.chunkSize)
+			got := createChunk(tt.candles, tt.chunkSize)
 			if !reflect.DeepEqual(got, tt.wantChunks) {
-				t.Errorf("createCandlesChunk() = %v, want %v", got, tt.wantChunks)
+				t.Errorf("createChunk() = %v, want %v", got, tt.wantChunks)
 			}
 		})
 	}
