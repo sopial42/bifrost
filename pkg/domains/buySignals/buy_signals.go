@@ -39,3 +39,28 @@ type Fullname string
 
 // BusinessID is used to ensure buysignal uniqueness
 type BusinessID string
+
+func ParseSignalStrategies(argsSignalStrategies []string) ([]Name, error) {
+	signalsStrat := make([]Name, len(argsSignalStrategies))
+	errors := []string{}
+	for i, ss := range argsSignalStrategies {
+		if !AllAvailableSignalStrategies[Name(ss)] {
+			errors = append(errors, ss)
+		} else {
+			signalsStrat[i] = Name(ss)
+		}
+	}
+
+	if len(errors) > 0 {
+		return []Name{}, fmt.Errorf("signalStrategy args not allowed: %s", errors)
+	}
+	return signalsStrat, nil
+}
+
+var MorningStarName Name = "morningStar"
+var RsiDivergenceName Name = "rsiDivergence"
+
+var AllAvailableSignalStrategies = map[Name]bool{
+	MorningStarName:   true,
+	RsiDivergenceName: true,
+}

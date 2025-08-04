@@ -12,7 +12,6 @@ import (
 	"github.com/sopial42/bifrost/pkg/domains/common"
 	"github.com/sopial42/bifrost/pkg/errors"
 	"github.com/sopial42/bifrost/pkg/logger"
-	"github.com/sopial42/bifrost/pkg/sdk"
 )
 
 const defaultCreateCandlesChunckSize = 1000
@@ -38,16 +37,6 @@ type Candles interface {
 	// QuerySurroundingDates returns the first and last candle date for a given pair and interval
 	// It returns 404 not found if no candles are found for the given pair and interval
 	QuerySurroundingDates(ctx context.Context, pair common.Pair, interval common.Interval) (*candles.Date, *candles.Date, error)
-}
-
-type client struct {
-	*sdk.Client
-}
-
-func NewCandlesClient(baseURL string) Candles {
-	return &client{
-		sdk.NewSDKClient(baseURL),
-	}
 }
 
 func (c *client) CreateCandles(ctx context.Context, newCandles *[]candles.Candle, chunckSize int) (*[]candles.Candle, error) {
