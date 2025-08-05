@@ -40,13 +40,16 @@ func (c *client) CreateBuySignals(ctx context.Context, newBS *[]buySignals.Detai
 			return nil, err
 		}
 
-		createdBSChunk := []buySignals.Details{}
-		err = json.Unmarshal(res, &createdBSChunk)
+		postReponse := struct {
+			BuySignals []buySignals.Details `json:"buy_signals"`
+		}{}
+
+		err = json.Unmarshal(res, &postReponse)
 		if err != nil {
-			return nil, errors.NewUnexpected("create failed to unmarshal candles while createChunck", err)
+			return nil, errors.NewUnexpected("create failed to unmarshal buySignals while createChunck", err)
 		}
 
-		createdBS = append(createdBS, createdBSChunk...)
+		createdBS = append(createdBS, postReponse.BuySignals...)
 	}
 
 	return &createdBS, nil

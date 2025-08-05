@@ -69,13 +69,16 @@ func (c *client) CreateCandles(ctx context.Context, newCandles *[]candles.Candle
 			return nil, err
 		}
 
-		createdCandlesChunk := []candles.Candle{}
-		err = json.Unmarshal(res, &createdCandlesChunk)
+		postResponse := struct {
+			Candles []candles.Candle `json:"candles"`
+		}{}
+
+		err = json.Unmarshal(res, &postResponse)
 		if err != nil {
 			return nil, errors.NewUnexpected("create failed to unmarshal candles while createChunck", err)
 		}
 
-		createdCandles = append(createdCandles, createdCandlesChunk...)
+		createdCandles = append(createdCandles, postResponse.Candles...)
 	}
 
 	return &createdCandles, nil
