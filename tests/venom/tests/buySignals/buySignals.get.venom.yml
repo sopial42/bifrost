@@ -1,0 +1,54 @@
+name: BuySignals service - GET
+version: '2'
+
+testcases:
+  - name: Reset db
+    steps:
+      - type: dbfixtures
+        database: postgres
+        dsn: "{{ .pgsql_dsn }}"
+        migrations: ../../data/schemas/
+        folder: ../../data/fixtures/buySignals/get
+        retry: 10
+  - name: GET buySignals
+    steps:
+      - name: Get buySignals with limit 1
+        type: http
+        method: GET
+        url: "{{.url}}/buy_signals?pair=BTCUSDT&interval=1h&name=golden_cross&first_date=2024-03-20T10:00:00Z&limit=1"
+        headers:
+          Content-Type: application/json
+        assertions:
+          - result.statuscode ShouldEqual 200
+          - result.bodyjson ShouldHaveLength 3
+          - result.bodyjson.buy_signals ShouldHaveLength 1
+          - result.bodyjson.buy_signals.buy_signals0 ShouldHaveLength 9
+          - result.bodyjson.buy_signals.buy_signals0.name ShouldEqual "golden_cross"
+          - result.bodyjson.buy_signals.buy_signals0.fullname ShouldEqual "Golden Cross BTC/USDT 1h"
+          - result.bodyjson.buy_signals.buy_signals0.business_id ShouldEqual "trading_bot_10"
+          - result.bodyjson.buy_signals.buy_signals0.id ShouldHaveLength 36
+          - result.bodyjson.has_more ShouldEqual true
+          - result.bodyjson.next_cursor ShouldEqual 2024-03-20T14:00:00Z
+
+      - name: Get buySignals no limit but first_date
+        type: http
+        method: GET
+        url: "{{.url}}/buy_signals?pair=BTCUSDT&interval=1h&name=golden_cross&first_date=2024-03-20T14:00:00Z&limit=0"
+        headers:
+          Content-Type: application/json
+        assertions:
+          - result.statuscode ShouldEqual 200
+          - result.bodyjson ShouldHaveLength 3
+          - result.bodyjson.buy_signals ShouldHaveLength 2
+          - result.bodyjson.buy_signals.buy_signals0 ShouldHaveLength 9
+          - result.bodyjson.buy_signals.buy_signals0.id ShouldHaveLength 36
+          - result.bodyjson.buy_signals.buy_signals0.business_id ShouldEqual "trading_bot_11"
+          - result.bodyjson.buy_signals.buy_signals0.name ShouldEqual "golden_cross"
+          - result.bodyjson.buy_signals.buy_signals0.fullname ShouldEqual "Golden Cross BTC/USDT 1h"
+          - result.bodyjson.buy_signals.buy_signals0 ShouldHaveLength 9
+          - result.bodyjson.buy_signals.buy_signals1.id ShouldHaveLength 36
+          - result.bodyjson.buy_signals.buy_signals1.business_id ShouldEqual "trading_bot_12"
+          - result.bodyjson.buy_signals.buy_signals1.name ShouldEqual "golden_cross"
+          - result.bodyjson.buy_signals.buy_signals1.fullname ShouldEqual "Golden Cross BTC/USDT 1h"
+          - result.bodyjson.has_more ShouldEqual false
+          - result.bodyjson.next_cursor ShouldEqual ""

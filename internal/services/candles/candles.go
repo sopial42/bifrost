@@ -41,8 +41,17 @@ func (p *candlesService) GetSurroundingDates(ctx context.Context, pair common.Pa
 	return firstDate, lastDate, nil
 }
 
-func (p *candlesService) GetCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time, limit int) (*[]domain.Candle, bool, *time.Time, error) {
-	candles, hasMore, nextCursor, err := p.persistence.QueryCandles(ctx, pair, interval, startDate, limit)
+func (p *candlesService) GetCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time, lastDate *time.Time, limit int) (*[]domain.Candle, bool, *time.Time, error) {
+	candles, hasMore, nextCursor, err := p.persistence.QueryCandles(ctx, pair, interval, startDate, lastDate, limit)
+	if err != nil {
+		return nil, false, nil, fmt.Errorf("unable to get candles: %w", err)
+	}
+
+	return candles, hasMore, nextCursor, nil
+}
+
+func (p *candlesService) GetCandlesFromLastDate(ctx context.Context, pair common.Pair, interval common.Interval, lastDate *time.Time, limit int) (*[]domain.Candle, bool, *time.Time, error) {
+	candles, hasMore, nextCursor, err := p.persistence.QueryCandlesFromLastDate(ctx, pair, interval, lastDate, limit)
 	if err != nil {
 		return nil, false, nil, fmt.Errorf("unable to get candles: %w", err)
 	}

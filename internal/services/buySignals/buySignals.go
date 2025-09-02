@@ -3,8 +3,10 @@ package buySignals
 import (
 	"context"
 	"fmt"
+	"time"
 
 	domain "github.com/sopial42/bifrost/pkg/domains/buySignals"
+	"github.com/sopial42/bifrost/pkg/domains/common"
 )
 
 type buySignalsService struct {
@@ -24,4 +26,13 @@ func (b *buySignalsService) CreateBuySignals(ctx context.Context, buySignals *[]
 	}
 
 	return bs, nil
+}
+
+func (b *buySignalsService) GetBuySignals(ctx context.Context, pair common.Pair, interval common.Interval, name domain.Name, date *time.Time, limit int) (*[]domain.Details, bool, *time.Time, error) {
+	bs, hasMore, nextCursor, err := b.persistence.QueryBuySignals(ctx, pair, interval, name, date, limit)
+	if err != nil {
+		return &[]domain.Details{}, false, nil, fmt.Errorf("unable to get buy signals: %w", err)
+	}
+
+	return bs, hasMore, nextCursor, nil
 }

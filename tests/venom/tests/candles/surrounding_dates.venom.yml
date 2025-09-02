@@ -18,8 +18,8 @@ testcases:
         url: "{{.url}}/candles/surrounding-dates?pair=BTCUSDT&interval=1h"
         assertions:
           - result.statuscode ShouldEqual 200
-          - result.bodyjson.first_date ShouldEqual 2024-02-08T09:00:00+09:00
-          - result.bodyjson.last_date ShouldEqual 2024-02-10T08:00:00+09:00
+          - result.bodyjson.first_date ShouldEqual 2024-02-08T00:00:00Z
+          - result.bodyjson.last_date ShouldEqual 2024-02-09T23:00:00Z
       - name: Should return 404 as not candles found
         type: http
         method: GET

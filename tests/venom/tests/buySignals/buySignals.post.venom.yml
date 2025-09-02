@@ -1,4 +1,4 @@
-name: BuySignals service
+name: BuySignals service - POST
 version: '2'
 
 testcases:
@@ -8,9 +8,9 @@ testcases:
         database: postgres
         dsn: "{{ .pgsql_dsn }}"
         migrations: ../../data/schemas/
-        folder: ../../data/fixtures/buySignals
+        folder: ../../data/fixtures/buySignals/post
         retry: 10
-  - name: Create buySignals
+  - name: POST buySignals
     steps:
       - type: http
         method: POST
@@ -23,6 +23,7 @@ testcases:
               {
                 "business_id": "trading_bot_1",
                 "pair": "BTCUSDT",
+                "interval": "1h",
                 "name": "golden_cross",
                 "fullname": "Golden Cross BTC/USDT 1h",
                 "date": "2024-03-20T10:00:00Z",
@@ -42,11 +43,13 @@ testcases:
           - result.statuscode ShouldEqual 201
           - result.bodyjson ShouldHaveLength 1
           - result.bodyjson.buy_signals ShouldHaveLength 1
+          - result.bodyjson.buy_signals.buy_signals0 ShouldHaveLength 9
           - result.bodyjson.buy_signals.buy_signals0.name ShouldEqual "golden_cross"
           - result.bodyjson.buy_signals.buy_signals0.fullname ShouldEqual "Golden Cross BTC/USDT 1h"
           - result.bodyjson.buy_signals.buy_signals0.business_id ShouldEqual "trading_bot_1"
           - result.bodyjson.buy_signals.buy_signals0.id ShouldHaveLength 36
           - result.bodyjson.buy_signals.buy_signals0.pair ShouldEqual "BTCUSDT"
+          - result.bodyjson.buy_signals.buy_signals0.interval ShouldEqual "1h"
           - result.bodyjson.buy_signals.buy_signals0.date ShouldEqual "2024-03-20T10:00:00Z"
           - result.bodyjson.buy_signals.buy_signals0.price ShouldEqual 65000.5
           - result.bodyjson.buy_signals.buy_signals0.metadata ShouldHaveLength 3
@@ -55,3 +58,4 @@ testcases:
           - result.bodyjson.buy_signals.buy_signals0.metadata.indicators ShouldHaveLength 2
           - result.bodyjson.buy_signals.buy_signals0.metadata.indicators.ma_fast ShouldEqual 50
           - result.bodyjson.buy_signals.buy_signals0.metadata.indicators.ma_slow ShouldEqual 200
+

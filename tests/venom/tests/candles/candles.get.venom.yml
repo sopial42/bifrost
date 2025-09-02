@@ -1,4 +1,4 @@
-name: Candles service
+name: Candles service - GET
 version: '2'
 
 testcases:
@@ -10,6 +10,43 @@ testcases:
         migrations: ../../data/schemas/
         folder: ../../data/fixtures/candles/get
         retry: 10
+
+  - name: GET candles default no limit
+    steps:
+      - type: http
+        method: GET
+        url: "{{.url}}/candles?pair=BTCUSDT&interval=4h"
+        assertions:
+          - result.statuscode ShouldEqual 200
+          - result.bodyjson ShouldHaveLength 3
+          - result.bodyjson.has_more ShouldEqual false
+          - result.bodyjson.next_cursor ShouldEqual ""
+          - result.bodyjson.candles ShouldHaveLength 3
+          - result.bodyjson.candles.candles0.id ShouldEqual "83e98bf6-aa44-48df-b86a-5ad84b02295a"
+          - result.bodyjson.candles.candles0 ShouldHaveLength 8
+          - result.bodyjson.candles.candles1.id ShouldEqual "cd211a52-42a7-47b2-bb09-f0119e70bf57"
+          - result.bodyjson.candles.candles1 ShouldHaveLength 8
+          - result.bodyjson.candles.candles2.id ShouldEqual "2f50ef06-0d72-4f28-8242-a1ad82d134db"
+          - result.bodyjson.candles.candles2 ShouldHaveLength 8
+
+  - name: GET candles with last date
+    steps:
+      - type: http
+        method: GET
+        url: "{{.url}}/candles?pair=BTCUSDT&interval=4h&last_date=2024-02-08T04:00:00Z"
+        assertions:
+          - result.statuscode ShouldEqual 200
+          - result.bodyjson ShouldHaveLength 3
+          - result.bodyjson.has_more ShouldEqual false
+          - result.bodyjson.next_cursor ShouldEqual ""
+          - result.bodyjson.candles ShouldHaveLength 2
+          - result.bodyjson.candles.candles0 ShouldHaveLength 8
+          - result.bodyjson.candles.candles0.id ShouldEqual "83e98bf6-aa44-48df-b86a-5ad84b02295a"
+          - result.bodyjson.candles.candles0.date ShouldEqual 2024-02-08T00:00:00Z
+          - result.bodyjson.candles.candles1 ShouldHaveLength 8
+          - result.bodyjson.candles.candles1.id ShouldEqual "cd211a52-42a7-47b2-bb09-f0119e70bf57"
+          - result.bodyjson.candles.candles1.date ShouldEqual 2024-02-08T04:00:00Z
+
   - name: GET candles limit of 2
     steps:
       - type: http
@@ -38,29 +75,13 @@ testcases:
         url: "{{.url}}/candles?pair=BTCUSDT&interval=4h&limit=2&start_date=2024-02-08T08:00:00Z"
         assertions:
           - result.statuscode ShouldEqual 200
-          - result.bodyjson ShouldHaveLength 2
+          - result.bodyjson ShouldHaveLength 3
           - result.bodyjson.has_more ShouldEqual false
+          - result.bodyjson.next_cursor ShouldEqual ""
           - result.bodyjson.candles ShouldHaveLength 1
           - result.bodyjson.candles.candles0 ShouldHaveLength 8
           - result.bodyjson.candles.candles0.id ShouldEqual "2f50ef06-0d72-4f28-8242-a1ad82d134db"
           - result.bodyjson.candles.candles0.date ShouldEqual 2024-02-08T08:00:00Z
-
-  - name: GET candles default no limit
-    steps:
-      - type: http
-        method: GET
-        url: "{{.url}}/candles?pair=BTCUSDT&interval=4h"
-        assertions:
-          - result.statuscode ShouldEqual 200
-          - result.bodyjson ShouldHaveLength 2
-          - result.bodyjson.has_more ShouldEqual false
-          - result.bodyjson.candles ShouldHaveLength 3
-          - result.bodyjson.candles.candles0.id ShouldEqual "83e98bf6-aa44-48df-b86a-5ad84b02295a"
-          - result.bodyjson.candles.candles0 ShouldHaveLength 8
-          - result.bodyjson.candles.candles1.id ShouldEqual "cd211a52-42a7-47b2-bb09-f0119e70bf57"
-          - result.bodyjson.candles.candles1 ShouldHaveLength 8
-          - result.bodyjson.candles.candles2.id ShouldEqual "2f50ef06-0d72-4f28-8242-a1ad82d134db"
-          - result.bodyjson.candles.candles2 ShouldHaveLength 8
 
   - name: GET candles in the future
     steps:
@@ -69,6 +90,7 @@ testcases:
         url: "{{.url}}/candles?pair=BTCUSDT&interval=4h&start_date=2555-02-08T12:00:00Z"
         assertions:
           - result.statuscode ShouldEqual 200
-          - result.bodyjson ShouldHaveLength 2
+          - result.bodyjson ShouldHaveLength 3
           - result.bodyjson.has_more ShouldEqual false
+          - result.bodyjson.next_cursor ShouldEqual ""
           - result.bodyjson.candles ShouldHaveLength 0

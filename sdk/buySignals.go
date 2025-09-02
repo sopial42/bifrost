@@ -3,8 +3,11 @@ package sdk
 import (
 	"context"
 	"encoding/json"
+	"net/url"
+	"time"
 
 	buySignals "github.com/sopial42/bifrost/pkg/domains/buySignals"
+	"github.com/sopial42/bifrost/pkg/domains/common"
 	"github.com/sopial42/bifrost/pkg/errors"
 )
 
@@ -12,6 +15,7 @@ const defaultCreateBuySignalsChunckSize = 1000
 
 type BuySignals interface {
 	CreateBuySignals(ctx context.Context, buySignal *[]buySignals.Details) (*[]buySignals.Details, error)
+	GetBuySignals(context.Context, common.Pair, common.Interval, buySignals.Name, *time.Time) (res *[]buySignals.Details, hasMore bool, nextCursor *time.Time, err error)
 }
 
 func (c *client) CreateBuySignals(ctx context.Context, newBS *[]buySignals.Details) (*[]buySignals.Details, error) {
@@ -53,4 +57,34 @@ func (c *client) CreateBuySignals(ctx context.Context, newBS *[]buySignals.Detai
 	}
 
 	return &createdBS, nil
+}
+
+func (c *client) GetBuySignals(ctx context.Context, pair common.Pair, interval common.Interval, name buySignals.Name, firstDate *time.Time) (*[]buySignals.Details, bool, *time.Time, error) {
+	queryValues := url.Values{}
+
+	queryValues.Add("pair", pair.String())
+	queryValues.Add("interval", interval.String())
+	queryValues.Add("name", string(name))
+
+	if firstDate != nil {
+		queryValues.Add("first_date", firstDate.Format(time.RFC3339))
+	}
+
+	res, err := c.Get(ctx, "/buy_signals?"+queryValues.Encode())
+	if err != nil {
+		return nil, false, nil, err
+	}
+
+	getResponse := struct {
+		BuySignals []buySignals.Details `json:"buy_signals"`
+		HasMore    bool                 `json:"has_more"`
+		NextCursor *time.Time           `json:"next_cursor"`
+	}{}
+
+	err = json.Unmarshal(res, &getResponse)
+	if err != nil {
+		return nil, false, nil, errors.NewUnexpected("failed to unmarshal buySignals", err)
+	}
+
+	return &getResponse.BuySignals, getResponse.HasMore, getResponse.NextCursor, nil
 }

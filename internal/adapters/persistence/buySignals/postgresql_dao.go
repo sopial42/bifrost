@@ -20,6 +20,7 @@ type BuySignalDAO struct {
 	Name       domain.Name
 	Fullname   domain.Fullname
 	Pair       common.Pair
+	Interval   common.Interval
 	Date       time.Time
 	Price      float64
 	Metadata   map[string]any `bun:"metadata,type:jsonb,nullzero"`
@@ -36,6 +37,7 @@ func buySignalDetailsToBuySignalDAOs(ctx context.Context, buySignals *[]domain.D
 			Name:       domain.Name(bs.Name),
 			Fullname:   domain.Fullname(bs.Fullname),
 			Pair:       common.Pair(bs.Pair),
+			Interval:   common.Interval(bs.Interval),
 			Date:       time.Time(bs.Date),
 			Price:      bs.Price,
 			Metadata:   bs.Metadata,
@@ -56,11 +58,15 @@ func buySignalDetailsToBuySignalDAOs(ctx context.Context, buySignals *[]domain.D
 	return buySignalsDAO
 }
 
-func buySignalDAOsToBuySignalDetails(ctx context.Context, buySignalsDAO []BuySignalDAO) *[]domain.Details {
+func buySignalDAOsToBuySignalDetails(ctx context.Context, buySignalsDAO *[]BuySignalDAO) *[]domain.Details {
 	log := logger.GetLogger(ctx)
-	buySignals := make([]domain.Details, len(buySignalsDAO))
+	if buySignalsDAO == nil {
+		return &[]domain.Details{}
+	}
 
-	for i, bs := range buySignalsDAO {
+	buySignals := make([]domain.Details, len(*buySignalsDAO))
+
+	for i, bs := range *buySignalsDAO {
 		if bs.ID == uuid.Nil {
 			log.Warnf("unable to convert buy signal as ID is nil: %+v", bs)
 			continue
@@ -73,6 +79,7 @@ func buySignalDAOsToBuySignalDetails(ctx context.Context, buySignalsDAO []BuySig
 			Name:       domain.Name(bs.Name),
 			Fullname:   domain.Fullname(bs.Fullname),
 			Pair:       common.Pair(bs.Pair),
+			Interval:   common.Interval(bs.Interval),
 			Date:       domain.Date(bs.Date),
 			Price:      bs.Price,
 			Metadata:   bs.Metadata,

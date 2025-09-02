@@ -27,6 +27,7 @@ func SetHandler(e *echo.Echo, service candlesSVC.Service) {
 	{
 		apiV1.GET("/candles/surrounding-dates", p.getSurroundingDates)
 		apiV1.GET("/candles", p.getCandles)
+		apiV1.GET("/candles/from-last-date", p.getCandlesFromLastDate)
 		apiV1.POST("/candles", p.createcandles)
 		apiV1.PATCH("/candles/rsi", p.updateCandlesRSI)
 	}
@@ -54,16 +55,14 @@ func (p *candlesHandler) createcandles(context echo.Context) error {
 	return context.JSON(http.StatusCreated, candles)
 }
 
-type getCandleResponse struct {
-	Candles    *[]domain.Candle `json:"candles"`
-	HasMore    bool             `json:"has_more"`
-	NextCursor *time.Time       `json:"next_cursor,omitempty"`
-}
-
 func (p *candlesHandler) getCandles(context echo.Context) error {
 	ctx := context.Request().Context()
 	pair := common.Pair(context.QueryParam("pair"))
 	interval := common.Interval(context.QueryParam("interval"))
+	var startDate *time.Time
+	startDateArg := context.QueryParam("start_date")
+	var lastDate *time.Time
+	lastDateArg := context.QueryParam("last_date")
 
 	if pair == "" || interval == "" {
 		return appErrors.NewInvalidInput("invalid input, pair and interval are required", nil)
@@ -81,8 +80,6 @@ func (p *candlesHandler) getCandles(context echo.Context) error {
 		}
 	}
 
-	var startDate *time.Time
-	startDateArg := context.QueryParam("start_date")
 	if startDateArg == "" {
 		startDate = nil
 	} else {
@@ -93,15 +90,73 @@ func (p *candlesHandler) getCandles(context echo.Context) error {
 		startDate = &startDateParsed
 	}
 
-	candles, hasMore, nextCursor, err := p.candlesSVC.GetCandles(ctx, pair, interval, startDate, limit)
+	if lastDateArg == "" {
+		lastDate = nil
+	} else {
+		lastDateParsed, err := time.Parse(time.RFC3339, lastDateArg)
+		if err != nil {
+			return appErrors.NewInvalidInput("invalid input, last_date is required in RFC3339 format", err)
+		}
+
+		lastDate = &lastDateParsed
+	}
+
+	candles, hasMore, nextCursor, err := p.candlesSVC.GetCandles(ctx, pair, interval, startDate, lastDate, limit)
 	if err != nil {
 		return fmt.Errorf("unable to get candles: %w", err)
 	}
 
-	return context.JSON(http.StatusOK, getCandleResponse{
-		Candles:    candles,
-		HasMore:    hasMore,
-		NextCursor: nextCursor,
+	return context.JSON(http.StatusOK, map[string]any{
+		"candles":     candles,
+		"has_more":    hasMore,
+		"next_cursor": nextCursor,
+	})
+}
+
+// GetCandlesByLastDate reverse the cursor, the next_cursor has to be used as last_date argument
+func (p *candlesHandler) getCandlesFromLastDate(context echo.Context) error {
+	ctx := context.Request().Context()
+	pair := common.Pair(context.QueryParam("pair"))
+	interval := common.Interval(context.QueryParam("interval"))
+	lastDateArg := context.QueryParam("last_date")
+
+	if pair == "" || interval == "" {
+		return appErrors.NewInvalidInput("invalid input, pair and interval are required", nil)
+	}
+
+	var lastDate *time.Time
+	var limit int
+	var err error
+	limitParam := context.QueryParam("limit")
+	if limitParam == "" {
+		limit = 0
+	} else {
+		limit, err = strconv.Atoi(limitParam)
+		if err != nil {
+			return appErrors.NewInvalidInput("invalid limit input, must be an integer", err)
+		}
+	}
+
+	if lastDateArg == "" {
+		return appErrors.NewInvalidInput("invalid input, last_date is required", nil)
+	} else {
+		lastDateParsed, err := time.Parse(time.RFC3339, lastDateArg)
+		if err != nil {
+			return appErrors.NewInvalidInput("invalid input, last_date is required in RFC3339 format", err)
+		}
+
+		lastDate = &lastDateParsed
+	}
+
+	candles, hasMore, nextCursor, err := p.candlesSVC.GetCandlesFromLastDate(ctx, pair, interval, lastDate, limit)
+	if err != nil {
+		return fmt.Errorf("unable to get candles: %w", err)
+	}
+
+	return context.JSON(http.StatusOK, map[string]any{
+		"candles":     candles,
+		"has_more":    hasMore,
+		"next_cursor": nextCursor,
 	})
 }
 
@@ -118,9 +173,9 @@ func (p *candlesHandler) getSurroundingDates(context echo.Context) error {
 		return fmt.Errorf("unable to get first and last dates: %w", err)
 	}
 
-	return context.JSON(http.StatusOK, map[string]string{
-		"first_date": firstDate.String(),
-		"last_date":  lastDate.String(),
+	return context.JSON(http.StatusOK, map[string]any{
+		"first_date": firstDate,
+		"last_date":  lastDate,
 	})
 }
 

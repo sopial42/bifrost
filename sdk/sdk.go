@@ -5,6 +5,7 @@ import "github.com/sopial42/bifrost/pkg/sdk"
 type Bifrost interface {
 	Candles
 	BuySignals
+	Positions
 }
 
 type client struct {

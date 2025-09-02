@@ -45,7 +45,7 @@ func (c *pgPersistence) InsertCandles(ctx context.Context, candles *[]domain.Can
 	return candlesDAOsToCandlesDetails(ctx, candlesDAO), nil
 }
 
-func (c *pgPersistence) QueryCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time, limit int) (*[]domain.Candle, bool, *time.Time, error) {
+func (c *pgPersistence) QueryCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time, lastDate *time.Time, limit int) (*[]domain.Candle, bool, *time.Time, error) {
 	result := []CandleDAO{}
 	request := c.clientDB.NewSelect().Model(&result).
 		Where("pair = ?", pair).
@@ -54,6 +54,10 @@ func (c *pgPersistence) QueryCandles(ctx context.Context, pair common.Pair, inte
 
 	if startDate != nil && !startDate.IsZero() {
 		request.Where("date >= ?", startDate)
+	}
+
+	if lastDate != nil && !lastDate.IsZero() {
+		request.Where("date <= ?", lastDate)
 	}
 
 	if limit > 0 {
@@ -74,6 +78,48 @@ func (c *pgPersistence) QueryCandles(ctx context.Context, pair common.Pair, inte
 	if hasMore {
 		nextCursor = &result[len(result)-1].Date
 		result = result[:limit]
+	}
+
+	return candlesDAOsToCandlesDetails(ctx, &result), hasMore, nextCursor, nil
+}
+
+func (c *pgPersistence) QueryCandlesFromLastDate(ctx context.Context, pair common.Pair, interval common.Interval, lastDate *time.Time, limit int) (*[]domain.Candle, bool, *time.Time, error) {
+	result := []CandleDAO{}
+	request := c.clientDB.NewSelect().Model(&result).
+		Where("pair = ?", pair).
+		Where("interval = ?", interval).
+		OrderExpr("date DESC")
+
+	if lastDate != nil && !lastDate.IsZero() {
+		request.Where("date <= ?", lastDate)
+	} else {
+		return nil, false, nil, fmt.Errorf("last_date is required")
+	}
+
+	if limit > 0 {
+		request.Limit(limit + 1)
+	}
+
+	err := request.Scan(ctx)
+	if err != nil {
+		return nil, false, nil, fmt.Errorf("unable to perform db query: %w", err)
+	}
+
+	// reverse the result
+	for i := len(result)/2 - 1; i >= 0; i-- {
+		opp := len(result) - 1 - i
+		result[i], result[opp] = result[opp], result[i]
+	}
+
+	if limit <= 0 {
+		return candlesDAOsToCandlesDetails(ctx, &result), false, nil, nil
+	}
+
+	hasMore := len(result) > limit
+	var nextCursor *time.Time
+	if hasMore {
+		nextCursor = &result[0].Date
+		result = result[1:]
 	}
 
 	return candlesDAOsToCandlesDetails(ctx, &result), hasMore, nextCursor, nil

@@ -38,17 +38,17 @@ testcases:
         assertions:
           - result.statuscode ShouldEqual 201
           - result.bodyjson ShouldHaveLength 1
-          - result.bodyjson.bodyjson0 ShouldHaveLength 8
-          - result.bodyjson.bodyjson0.name ShouldEqual "simple"
-          - result.bodyjson.bodyjson0.fullname ShouldEqual "simple-1-1"
-          - result.bodyjson.bodyjson0.buy_signal_id ShouldEqual 123e4567-e89b-12d3-a456-426614174000
-          - result.bodyjson.bodyjson0.id ShouldHaveLength 36
-          - result.bodyjson.bodyjson0.buy_signal ShouldBeNil
-          - result.bodyjson.bodyjson0.tp ShouldEqual 10
-          - result.bodyjson.bodyjson0.sl ShouldEqual 9
-          - result.bodyjson.bodyjson0.serial_id ShouldEqual 10001
-          - result.bodyjson.bodyjson0.metadata ShouldHaveLength 4
-          - result.bodyjson.bodyjson0.metadata.entry_type ShouldEqual "market"
-          - result.bodyjson.bodyjson0.metadata.leverage ShouldEqual 1
-          - result.bodyjson.bodyjson0.metadata.size ShouldEqual 0.1
-          - result.bodyjson.bodyjson0.metadata.notes ShouldEqual "Strong trend following golden cross"
+          - result.bodyjson.positions.positions0 ShouldHaveLength 8
+          - result.bodyjson.positions.positions0.name ShouldEqual "simple"
+          - result.bodyjson.positions.positions0.fullname ShouldEqual "simple-1-1"
+          - result.bodyjson.positions.positions0.buy_signal_id ShouldEqual 123e4567-e89b-12d3-a456-426614174000
+          - result.bodyjson.positions.positions0.id ShouldHaveLength 36
+          - result.bodyjson.positions.positions0.buy_signal ShouldBeNil
+          - result.bodyjson.positions.positions0.tp ShouldEqual 10
+          - result.bodyjson.positions.positions0.sl ShouldEqual 9
+          - result.bodyjson.positions.positions0.serial_id ShouldEqual 10001
+          - result.bodyjson.positions.positions0.metadata ShouldHaveLength 4
+          - result.bodyjson.positions.positions0.metadata.entry_type ShouldEqual "market"
+          - result.bodyjson.positions.positions0.metadata.leverage ShouldEqual 1
+          - result.bodyjson.positions.positions0.metadata.size ShouldEqual 0.1
+          - result.bodyjson.positions.positions0.metadata.notes ShouldEqual "Strong trend following golden cross"

@@ -1,0 +1,61 @@
+- id: "123e4567-e89b-12d3-a456-000000000000"
+  business_id: "trading_bot_10"
+  pair: "BTCUSDT"
+  interval: "1h"
+  name: "golden_cross"
+  fullname: "Golden Cross BTC/USDT 1h"
+  date: "2024-03-20T10:00:00Z"
+  price: 65000.50
+  metadata:
+    strategy: "moving_average"
+    confidence: 0.85
+    indicators:
+      ma_fast: 50
+      ma_slow: 200
+
+- id: "123e4567-e89b-12d3-a456-000000000001"
+  business_id: "trading_bot_11"
+  pair: "BTCUSDT"
+  interval: "1h"
+  name: "golden_cross"
+  fullname: "Golden Cross BTC/USDT 1h"
+  date: "2024-03-20T14:00:00Z"
+  price: 65000.50
+  metadata:
+    strategy: "moving_average"
+    confidence: 0.85
+    indicators:
+      ma_fast: 50
+      ma_slow: 200
+
+
+- id: "123e4567-e89b-12d3-a456-000000000002"
+  business_id: "trading_bot_12"
+  pair: "BTCUSDT"
+  interval: "1h"
+  name: "golden_cross"
+  fullname: "Golden Cross BTC/USDT 1h"
+  date: "2024-03-20T18:00:00Z"
+  price: 65000.50
+  metadata:
+    strategy: "moving_average"
+    confidence: 0.85
+    indicators:
+      ma_fast: 50
+      ma_slow: 200
+
+
+- id: "123e4567-e89b-12d3-a456-000000000003"
+  business_id: "trading_bot_13"
+  pair: "BTCUSDT"
+  interval: "1h"
+  name: "SILVER_CROSS"
+  fullname: "Silver Cross BTC/USDT 1h"
+  date: "2024-03-20T18:00:00Z"
+  price: 65000.50
+  metadata:
+    strategy: "moving_average"
+    confidence: 0.85
+    indicators:
+      ma_fast: 50
+      ma_slow: 200

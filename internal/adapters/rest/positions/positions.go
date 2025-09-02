@@ -67,5 +67,7 @@ func (p *positionsHandler) createPositions(context echo.Context) error {
 		return appErrors.NewUnexpected("unable to create positions", err)
 	}
 
-	return context.JSON(http.StatusCreated, positions)
+	return context.JSON(http.StatusCreated, map[string]interface{}{
+		"positions": positions,
+	})
 }

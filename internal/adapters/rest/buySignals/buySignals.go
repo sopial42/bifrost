@@ -2,6 +2,7 @@ package buysignals
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -24,6 +25,7 @@ func SetHandler(e *echo.Echo, service buySignalsSVC.Service) {
 	apiV1 := e.Group("/api/v1")
 	{
 		apiV1.POST("/buy_signals", p.createBuySignals)
+		apiV1.GET("/buy_signals", p.getBuySignals)
 	}
 }
 
@@ -36,6 +38,7 @@ type InputBuySignal struct {
 	BusinessID domain.BusinessID `json:"business_id"`
 	Fullname   domain.Fullname   `json:"fullname"`
 	Pair       common.Pair       `json:"pair"`
+	Interval   common.Interval   `json:"interval"`
 	Date       time.Time         `json:"date"`
 	Price      float64           `json:"price"`
 	Metadata   map[string]any    `json:"metadata"`
@@ -58,6 +61,7 @@ func (p *buySignalsHandler) createBuySignals(context echo.Context) error {
 			BusinessID: bs.BusinessID,
 			Fullname:   bs.Fullname,
 			Pair:       bs.Pair,
+			Interval:   bs.Interval,
 			Date:       domain.Date(bs.Date),
 			Price:      bs.Price,
 			Metadata:   bs.Metadata,
@@ -71,5 +75,52 @@ func (p *buySignalsHandler) createBuySignals(context echo.Context) error {
 
 	return context.JSON(http.StatusCreated, map[string]any{
 		"buy_signals": buySignals,
+	})
+}
+
+func (p buySignalsHandler) getBuySignals(context echo.Context) (err error) {
+	pair := context.QueryParam("pair")
+	interval := context.QueryParam("interval")
+	name := context.QueryParam("name")
+	firstDate := context.QueryParam("first_date")
+	limit := context.QueryParam("limit")
+
+	pairParsed := common.Pair(pair)
+	if !pairParsed.IsValid() {
+		return appErrors.NewInvalidInput("invalid pair", nil)
+	}
+
+	intervalParsed := common.Interval(interval)
+	if !intervalParsed.IsValid() {
+		return appErrors.NewInvalidInput("invalid interval", nil)
+	}
+
+	firstDateParsed := time.Time{}
+	if firstDate != "" {
+		firstDateParsed, err = time.Parse(time.RFC3339, firstDate)
+		if err != nil {
+			return appErrors.NewInvalidInput("invalid first_date", err)
+		}
+	}
+
+	limitParsed, err := strconv.Atoi(limit)
+	if err != nil {
+		return appErrors.NewInvalidInput("invalid limit", err)
+	}
+
+	nameParsed := domain.Name(name)
+	if nameParsed == "" {
+		return appErrors.NewInvalidInput("invalid name", nil)
+	}
+
+	buySignals, hasMore, nextCursor, err := p.buySignalsSVC.GetBuySignals(context.Request().Context(), pairParsed, intervalParsed, nameParsed, &firstDateParsed, limitParsed)
+	if err != nil {
+		return appErrors.NewUnexpected("unable to get buySignals", err)
+	}
+
+	return context.JSON(http.StatusOK, map[string]any{
+		"buy_signals": buySignals,
+		"has_more":    hasMore,
+		"next_cursor": nextCursor,
 	})
 }

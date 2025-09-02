@@ -25,11 +25,15 @@ type Candles interface {
 
 	// GetCandles returns candles for a given pair and interval
 	// Use startDate and endDate to filter candles by date
-	// Return a limited count of candles defined by default in the sdk
+	// If limit param is > 0 use it as max candle count ot return, else use default sdk limit value
 	// Return hasMore = true if there are more candles to fetch using nextCursor
 	// Return nextCursor = the last candle date if there are more candles to fetch
-	GetCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time) (res *[]candles.Candle, hasMore bool, nextCursor *time.Time, err error)
+	GetCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time, limit uint) (res *[]candles.Candle, hasMore bool, nextCursor *time.Time, err error)
+	GetCandleByDate(ctx context.Context, pair common.Pair, interval common.Interval, date candles.Date) (res *candles.Candle, err error)
+	// GetCandlesByLastDate reverse the cursor, the next_cursor has to be used as last_date argument
+	GetCandlesByLastDate(ctx context.Context, pair common.Pair, interval common.Interval, lastDate candles.Date, limit uint) (res *[]candles.Candle, hasMore bool, nextCursor *time.Time, err error)
 
+	// GetCandlesByDate returns candles for a given pair and interval and date
 	// UpdateCandleListRSI updates only the RSI for a list of candles
 	// It returns the updated candles
 	UpdateCandleListRSI(ctx context.Context, candles *[]candles.Candle) (*[]candles.Candle, error)
@@ -125,12 +129,16 @@ func (c *client) UpdateCandleListRSI(ctx context.Context, candlesRSIs *[]candles
 	return &updatedCandles, nil
 }
 
-func (c *client) GetCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time) (*[]candles.Candle, bool, *time.Time, error) {
+func (c *client) GetCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time, limit uint) (*[]candles.Candle, bool, *time.Time, error) {
 	queryValues := url.Values{}
+
+	if limit <= 0 {
+		limit = defaultGetCandlesLimit
+	}
 
 	queryValues.Add("pair", string(pair))
 	queryValues.Add("interval", string(interval))
-	queryValues.Add("limit", strconv.Itoa(defaultGetCandlesLimit))
+	queryValues.Add("limit", strconv.Itoa(int(limit)))
 
 	if startDate != nil {
 		queryValues.Add("start_date", startDate.Format(time.RFC3339))
@@ -150,6 +158,65 @@ func (c *client) GetCandles(ctx context.Context, pair common.Pair, interval comm
 	err = json.Unmarshal(res, &candlesResponse)
 	if err != nil {
 		return nil, false, nil, errors.NewUnexpected("failed to unmarshal GetCandles response", err)
+	}
+
+	return &candlesResponse.Candles, candlesResponse.HasMore, candlesResponse.NextCursor, nil
+}
+
+func (c *client) GetCandleByDate(ctx context.Context, pair common.Pair, interval common.Interval, date candles.Date) (res *candles.Candle, err error) {
+	queryValues := url.Values{}
+
+	queryValues.Add("pair", string(pair))
+	queryValues.Add("interval", string(interval))
+	queryValues.Add("date", date.String())
+	queryValues.Add("limit", "1")
+
+	body, err := c.Get(ctx, "/candles?"+queryValues.Encode())
+	if err != nil {
+		return nil, fmt.Errorf("failed to get candle: %w", err)
+	}
+
+	candleResponse := struct {
+		Candles []candles.Candle `json:"candles"`
+	}{}
+
+	err = json.Unmarshal(body, &candleResponse)
+	if err != nil {
+		return nil, errors.NewUnexpected("failed to unmarshal GetCandleByDate response", err)
+	}
+
+	if len(candleResponse.Candles) == 0 {
+		return nil, nil
+	}
+	return &candleResponse.Candles[0], nil
+}
+
+func (c *client) GetCandlesByLastDate(ctx context.Context, pair common.Pair, interval common.Interval, lastDate candles.Date, limit uint) (*[]candles.Candle, bool, *time.Time, error) {
+	queryValues := url.Values{}
+
+	if limit <= 0 {
+		limit = defaultGetCandlesLimit
+	}
+
+	queryValues.Add("pair", string(pair))
+	queryValues.Add("interval", string(interval))
+	queryValues.Add("last_date", lastDate.String())
+	queryValues.Add("limit", strconv.Itoa(int(limit)))
+
+	res, err := c.Get(ctx, "/candles/from-last-date?"+queryValues.Encode())
+	if err != nil {
+		return nil, false, nil, fmt.Errorf("failed to get candles: %w", err)
+	}
+
+	candlesResponse := struct {
+		Candles []candles.Candle `json:"candles"`
+		HasMore    bool             `json:"has_more"`
+		NextCursor *time.Time       `json:"next_cursor"`
+	}{}
+
+	err = json.Unmarshal(res, &candlesResponse)
+	if err != nil {
+		return nil, false, nil, errors.NewUnexpected("failed to unmarshal GetCandlesByLastDate response", err)
 	}
 
 	return &candlesResponse.Candles, candlesResponse.HasMore, candlesResponse.NextCursor, nil

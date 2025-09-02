@@ -49,8 +49,9 @@ testcases:
         url: "{{.url}}/candles?pair=BTCUSDT&interval=4h"
         assertions:
           - result.statuscode ShouldEqual 200
-          - result.bodyjson ShouldHaveLength 2
+          - result.bodyjson ShouldHaveLength 3
           - result.bodyjson.has_more ShouldEqual false
+          - result.bodyjson.next_cursor ShouldEqual ""
           - result.bodyjson.candles.candles0 ShouldHaveLength 9
           - result.bodyjson.candles.candles0.rsi.50 ShouldEqual 50.3
           - result.bodyjson.candles.candles1 ShouldHaveLength 8
