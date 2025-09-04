@@ -1,0 +1,10 @@
+- id: "123e4567-e89b-12d3-a456-426614174000"
+  pair: SOLUSDC
+  interval: 1h
+  date: 2025-09-02T02:00:00Z
+  price: 199.5
+  business_id: trading_bot_1
+  name: golden_cross
+  fullname: Golden Cross BTC/USDT 1h
+  metadata:
+    strategy: moving_average

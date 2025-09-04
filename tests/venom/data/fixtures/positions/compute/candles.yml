@@ -1,0 +1,42 @@
+# Candles data: Focus on HIGH or LOW to define TP and SL
+
+##########
+# Minute #
+#########
+
+- id: 11111111-0d72-4f28-8242-a1ad82d11111
+  date: 2025-09-02 01:59:00+0000
+  pair: SOLUSDC
+  interval: 1m
+  open: 1
+  close: 1
+  high: 209.2
+  low: 207.44
+
+- id: 11111111-0d72-4f28-8242-a1ad82d12222
+  date: 2025-09-02 02:00:00+0000
+  pair: SOLUSDC
+  interval: 1m
+  open: 1
+  close: 1
+  high: 207.9
+  low: 207.44
+
+- id: 11111111-0d72-4f28-8242-a1ad82d13333
+  date: 2025-09-02 02:01:00+0000
+  pair: SOLUSDC
+  interval: 1m
+  open: 1
+  close: 1
+  high: 208.9
+  low: 207.44
+
+- id: 11111111-0d72-4f28-8242-a1ad82d15555
+  date: 2025-09-02 02:02:00+0000
+  pair: SOLUSDC
+  interval: 1m
+  open: 1
+  close: 1
+  high: 208.9
+  low: 99
+

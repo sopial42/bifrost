@@ -125,6 +125,63 @@ func (c *pgPersistence) QueryCandlesFromLastDate(ctx context.Context, pair commo
 	return candlesDAOsToCandlesDetails(ctx, &result), hasMore, nextCursor, nil
 }
 
+func (c *pgPersistence) QueryCandlesThatHitTPOrSL(ctx context.Context, pair common.Pair, buyDate domain.Date, tp float64, sl float64) (*domain.Candle, *domain.Candle, error) {
+	res := make([]*domain.Candle, 2)
+
+	for i, search := range []PriceHitSearch{{
+		Condition: PriceHitConditionTP,
+		Price:     tp,
+	}, {
+		Condition: PriceHitConditionSL,
+		Price:     sl,
+	}} {
+		candle, err := c.searchPrice(ctx, pair, buyDate, search)
+		if err != nil {
+			return nil, nil, fmt.Errorf("unable to perform db query: %w", err)
+		}
+
+		res[i] = candle
+	}
+
+	return res[0], res[1], nil
+}
+
+type PriceHitSearch struct {
+	Price     float64
+	Condition PriceHitCondition
+}
+
+type PriceHitCondition string
+
+const (
+	PriceHitConditionTP PriceHitCondition = "high >= ?"
+	PriceHitConditionSL PriceHitCondition = "low <= ?"
+)
+
+func (c *pgPersistence) searchPrice(ctx context.Context, pair common.Pair, buyDate domain.Date, search PriceHitSearch) (*domain.Candle, error) {
+	candleRes := []CandleDAO{}
+
+	baseReq := c.clientDB.NewSelect().
+		Where("pair = ?", pair).
+		Where("interval = ?", "1m").
+		Where("date >= ?", time.Time(buyDate)).
+		Where(string(search.Condition), search.Price).
+		OrderExpr("date ASC").
+		Limit(1)
+
+	err := baseReq.Model(&candleRes).
+		Scan(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("unable to perform db query: %w", err)
+	}
+
+	if len(candleRes) == 0 {
+		return nil, nil
+	}
+
+	return candleDAOToCandleDetails(ctx, &candleRes[0]), nil
+}
+
 func (c *pgPersistence) QuerySurroundingDates(ctx context.Context, pair common.Pair, interval common.Interval) (*domain.Date, *domain.Date, error) {
 	var row struct {
 		First *time.Time `bun:"first_date"`

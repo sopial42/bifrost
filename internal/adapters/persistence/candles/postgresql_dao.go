@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/labstack/gommon/log"
 	"github.com/uptrace/bun"
 
 	domain "github.com/sopial42/bifrost/pkg/domains/candles"
@@ -73,39 +74,50 @@ func candlesToCandlesDAO(ctx context.Context, candles *[]domain.Candle, isUpdate
 }
 
 func candlesDAOsToCandlesDetails(ctx context.Context, candlesDAO *[]CandleDAO) *[]domain.Candle {
-	log := logger.GetLogger(ctx)
 	if candlesDAO == nil {
 		return nil
 	}
 
-	candles := make([]domain.Candle, len(*candlesDAO))
-	for i, c := range *candlesDAO {
-		if c.ID == uuid.Nil {
-			log.Warnf("unable to convert candle as ID is nil: %+v", c)
-			continue
-		}
-
-		id := domain.ID(c.ID)
-
-		candles[i] = domain.Candle{
-			ID:       &id,
-			Date:     domain.Date(c.Date),
-			Pair:     common.Pair(c.Pair),
-			Interval: common.Interval(c.Interval),
-			Open:     c.Open,
-			Close:    c.Close,
-			High:     c.High,
-			Low:      c.Low,
-		}
-
-		if c.RSI != nil {
-			rsi := domain.RSI{}
-			err := json.Unmarshal(*c.RSI, &rsi)
-			if err == nil {
-				candles[i].RSI = &rsi
-			}
+	candles := make([]domain.Candle, 0)
+	for _, c := range *candlesDAO {
+		if newCandle := candleDAOToCandleDetails(ctx, &c); newCandle != nil {
+			candles = append(candles, *newCandle)
 		}
 	}
 
 	return &candles
+}
+
+func candleDAOToCandleDetails(ctx context.Context, candleDAO *CandleDAO) *domain.Candle {
+	if candleDAO == nil {
+		return nil
+	}
+
+	if candleDAO.ID == uuid.Nil {
+		log.Warnf("unable to convert candle as ID is nil: %+v", candleDAO)
+		return nil
+	}
+
+	id := domain.ID(candleDAO.ID)
+
+	candle := domain.Candle{
+		ID:       &id,
+		Date:     domain.Date(candleDAO.Date),
+		Pair:     common.Pair(candleDAO.Pair),
+		Interval: common.Interval(candleDAO.Interval),
+		Open:     candleDAO.Open,
+		Close:    candleDAO.Close,
+		High:     candleDAO.High,
+		Low:      candleDAO.Low,
+	}
+
+	if candleDAO.RSI != nil {
+		rsi := domain.RSI{}
+		err := json.Unmarshal(*candleDAO.RSI, &rsi)
+		if err == nil {
+			candle.RSI = &rsi
+		}
+	}
+
+	return &candle
 }

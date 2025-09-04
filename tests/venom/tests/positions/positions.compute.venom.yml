@@ -1,0 +1,23 @@
+name: Positions service
+version: '2'
+
+testcases:
+  - name: Reset db
+    steps:
+      - type: dbfixtures
+        database: postgres
+        dsn: "{{ .pgsql_dsn }}"
+        migrations: ../../data/schemas/
+        folder: ../../data/fixtures/positions/compute
+        retry: 10
+  - name: Compute positions
+    steps:
+      - type: http
+        method: POST
+        url: "{{.url}}/positions/compute"
+        headers:
+          Content-Type: application/json
+        assertions:
+          - result.statuscode ShouldEqual 200
+          - result.bodyjson ShouldHaveLength 1
+          - result.bodyjson.message ShouldEqual "1 positions computed"

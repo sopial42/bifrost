@@ -27,10 +27,6 @@ import (
 	positionsHTTPHandler "github.com/sopial42/bifrost/internal/adapters/rest/positions"
 	positionsSVC "github.com/sopial42/bifrost/internal/services/positions"
 
-	ratiosPersistence "github.com/sopial42/bifrost/internal/adapters/persistence/ratios"
-	ratiosHTTPHandler "github.com/sopial42/bifrost/internal/adapters/rest/ratios"
-	ratiosSVC "github.com/sopial42/bifrost/internal/services/ratios"
-
 	"github.com/sopial42/bifrost/internal/config"
 	"github.com/sopial42/bifrost/pkg/errors"
 	"github.com/sopial42/bifrost/pkg/logger"
@@ -54,10 +50,7 @@ func main() {
 	candlesService := candlesSVC.NewCandlesService(candlesPersistence)
 
 	positionsPersistence := positionsPersistence.NewPersistence(pgClient.Client)
-	positionsService := positionsSVC.NewPositionsService(positionsPersistence)
-
-	ratiosPersistence := ratiosPersistence.NewPersistence(pgClient.Client)
-	ratiosService := ratiosSVC.NewRatiosService(ratiosPersistence)
+	positionsService := positionsSVC.NewPositionsService(positionsPersistence, candlesService)
 
 	// Custom logger
 	log := logger.NewLogger(config.Logger)
@@ -80,7 +73,6 @@ func main() {
 	buySignalsHTTPHandler.SetHandler(engine, buySignalsService)
 	candlesHTTPHandler.SetHandler(engine, candlesService)
 	positionsHTTPHandler.SetHandler(engine, positionsService)
-	ratiosHTTPHandler.SetHandler(engine, ratiosService)
 
 	// Start the server and handle shutdown
 	go func() {

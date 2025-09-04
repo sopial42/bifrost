@@ -13,7 +13,7 @@ const LoggerKeyFullname = "positions_fullname"
 
 type Details struct {
 	ID          ID                  `json:"id"`
-	SerialID    int64               `json:"serial_id"`
+	SerialID    SerialID            `json:"serial_id"`
 	Name        Name                `json:"name"`
 	Fullname    Fullname            `json:"fullname"`
 	BuySignalID buySignals.ID       `json:"buy_signal_id"`
@@ -21,7 +21,10 @@ type Details struct {
 	TP          float64             `json:"tp"`
 	SL          float64             `json:"sl"`
 	Metadata    map[string]any      `json:"metadata"`
+	Ratio       *float64            `json:"ratio,omitempty"`
 }
+
+type SerialID int64
 
 const (
 	FibonacciName  Name = "fibonacci"
@@ -34,6 +37,10 @@ var AllAvailablePositionStategies = map[Name]bool{
 }
 
 type ID uuid.UUID
+
+func (i ID) String() string {
+	return uuid.UUID(i).String()
+}
 
 func (i ID) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, uuid.UUID(i).String())), nil

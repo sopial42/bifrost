@@ -52,7 +52,9 @@ func (p *candlesHandler) createcandles(context echo.Context) error {
 		return fmt.Errorf("unable to create candles: %w", err)
 	}
 
-	return context.JSON(http.StatusCreated, candles)
+	return context.JSON(http.StatusCreated, map[string]interface{}{
+		"candles": candles,
+	})
 }
 
 func (p *candlesHandler) getCandles(context echo.Context) error {

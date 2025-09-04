@@ -20,6 +20,7 @@ type PositionDAO struct {
 	TP          float64                     `bun:"tp"`
 	SL          float64                     `bun:"sl"`
 	Metadata    map[string]any              `bun:"metadata,type:jsonb"`
+	Ratio       float64                     `bun:"ratio,nullzero"`
 }
 
 func positionDetailsToPositionDAOs(positions *[]positions.Details) []PositionDAO {
@@ -37,7 +38,6 @@ func positionDetailsToPositionDAOs(positions *[]positions.Details) []PositionDAO
 		}
 
 		positionDAOs[i] = PositionDAO{
-			ID:          uuid.New(),
 			BuySignalID: uuid.UUID(pos.BuySignalID),
 			Name:        string(pos.Name),
 			Fullname:    string(pos.Fullname),
@@ -45,6 +45,17 @@ func positionDetailsToPositionDAOs(positions *[]positions.Details) []PositionDAO
 			SL:          sl,
 			Metadata:    pos.Metadata,
 		}
+
+		if uuid.UUID(pos.ID) != uuid.Nil {
+			positionDAOs[i].ID = uuid.UUID(pos.ID)
+		} else {
+			positionDAOs[i].ID = uuid.New()
+		}
+
+		if pos.Ratio != nil {
+			positionDAOs[i].Ratio = *pos.Ratio
+		}
+
 	}
 
 	return positionDAOs
@@ -59,13 +70,17 @@ func positionDAOsToPositionDetails(positionsDAO []PositionDAO) (*[]positions.Det
 	for i, p := range positionsDAO {
 		res[i] = positions.Details{
 			ID:          positions.ID(p.ID),
-			SerialID:    p.SerialID,
+			SerialID:    positions.SerialID(p.SerialID),
 			BuySignalID: bsDomain.ID(p.BuySignalID),
 			Name:        positions.Name(p.Name),
 			Fullname:    positions.Fullname(p.Fullname),
 			TP:          p.TP,
 			SL:          p.SL,
 			Metadata:    p.Metadata,
+		}
+
+		if p.Ratio != 0 {
+			res[i].Ratio = &p.Ratio
 		}
 
 		if p.BuySignal != nil {

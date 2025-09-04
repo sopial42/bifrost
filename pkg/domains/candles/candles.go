@@ -11,6 +11,14 @@ import (
 
 type Date time.Time
 
+func (d Date) Before(other Date) bool {
+	return time.Time(d).Before(time.Time(other))
+}
+
+func (d Date) After(other Date) bool {
+	return time.Time(d).After(time.Time(other))
+}
+
 func (d Date) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, time.Time(d).Format(time.RFC3339))), nil
 }
@@ -30,7 +38,6 @@ func (d *Date) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-
 func (i ID) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, uuid.UUID(i).String())), nil
 }
@@ -49,7 +56,6 @@ func (i *ID) UnmarshalJSON(b []byte) error {
 	*i = ID(parsed)
 	return nil
 }
-
 
 // String method returns a human-readable date
 func (c Date) String() string {

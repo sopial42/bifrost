@@ -1,6 +1,7 @@
 package positions
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -24,6 +25,7 @@ func SetHandler(e *echo.Echo, service positionsSVC.Service) {
 	apiV1 := e.Group("/api/v1")
 	{
 		apiV1.POST("/positions", p.createPositions)
+		apiV1.POST("/positions/compute", p.computeAllPositions)
 	}
 }
 
@@ -38,6 +40,18 @@ type InputPositions struct {
 	TP          float64         `json:"tp"`
 	SL          float64         `json:"sl"`
 	Metadata    map[string]any  `json:"metadata"`
+	Ratio       float64         `json:"ratio"`
+}
+
+func (p *positionsHandler) computeAllPositions(context echo.Context) error {
+	updatedPositionsCount, err := p.positionsSVC.ComputeAllPositions(context.Request().Context())
+	if err != nil {
+		return appErrors.NewUnexpected("unable to compute all positions", err)
+	}
+
+	return context.JSON(http.StatusOK, map[string]interface{}{
+		"message": fmt.Sprintf("%d positions computed", updatedPositionsCount),
+	})
 }
 
 func (p *positionsHandler) createPositions(context echo.Context) error {
@@ -59,6 +73,7 @@ func (p *positionsHandler) createPositions(context echo.Context) error {
 			TP:          pos.TP,
 			SL:          pos.SL,
 			Metadata:    pos.Metadata,
+			Ratio:       &pos.Ratio,
 		}
 	}
 

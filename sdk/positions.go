@@ -12,6 +12,7 @@ const defaultCreatePositionsChunckSize = 1000
 
 type Positions interface {
 	CreatePositions(ctx context.Context, positions *[]positions.Details, chunckSize int) (*[]positions.Details, error)
+	GetUncomputedPositions(ctx context.Context) (*[]positions.Details, bool, positions.SerialID, error)
 }
 
 func (c *client) CreatePositions(ctx context.Context, newPositions *[]positions.Details, chunckSize int) (*[]positions.Details, error) {
@@ -58,4 +59,24 @@ func (c *client) CreatePositions(ctx context.Context, newPositions *[]positions.
 	}
 
 	return &createdPositions, nil
+}
+
+func (c *client) GetUncomputedPositions(ctx context.Context) (*[]positions.Details, bool, positions.SerialID, error) {
+	res, err := c.Get(ctx, "/positions/uncomputed")
+	if err != nil {
+		return nil, false, 0, err
+	}
+
+	positionsResponse := struct {
+		Positions  []positions.Details `json:"positions"`
+		HasMore    bool                `json:"has_more"`
+		NextCursor positions.SerialID  `json:"next_cursor"`
+	}{}
+
+	err = json.Unmarshal(res, &positionsResponse)
+	if err != nil {
+		return nil, false, 0, errors.NewUnexpected("get failed to unmarshal positions", err)
+	}
+
+	return &positionsResponse.Positions, positionsResponse.HasMore, positionsResponse.NextCursor, nil
 }

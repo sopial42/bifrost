@@ -59,6 +59,15 @@ func (p *candlesService) GetCandlesFromLastDate(ctx context.Context, pair common
 	return candles, hasMore, nextCursor, nil
 }
 
+func (p *candlesService) GetCandlesThatHitTPOrSL(ctx context.Context, pair common.Pair, buyDate domain.Date, tp float64, sl float64) (*domain.Candle, *domain.Candle, error) {
+	tpCandle, slCandle, err := p.persistence.QueryCandlesThatHitTPOrSL(ctx, pair, buyDate, tp, sl)
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to get candles that hit the TP or the SL: %w", err)
+	}
+
+	return tpCandle, slCandle, nil
+}
+
 func (p *candlesService) UpdateCandlesRSI(ctx context.Context, candles *[]domain.Candle) (*[]domain.Candle, error) {
 	candles, err := p.persistence.UpdateCandlesRSI(ctx, candles)
 	if err != nil {
