@@ -209,7 +209,7 @@ func (c *client) GetCandlesByLastDate(ctx context.Context, pair common.Pair, int
 	}
 
 	candlesResponse := struct {
-		Candles []candles.Candle `json:"candles"`
+		Candles    []candles.Candle `json:"candles"`
 		HasMore    bool             `json:"has_more"`
 		NextCursor *time.Time       `json:"next_cursor"`
 	}{}

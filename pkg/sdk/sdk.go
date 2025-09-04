@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"time"
@@ -59,13 +60,16 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response) ([]byte
 		return respBody, nil
 	}
 
-	var appErr appErrors.AppError
-	if err := json.Unmarshal(respBody, &appErr); err != nil {
+	errResponse := struct {
+		Error *appErrors.AppError `json:"error"`
+	}{}
+	if err := json.Unmarshal(respBody, &errResponse); err != nil {
 		return nil, appErrors.NewUnexpected("failed to handle error response", err)
 	}
 
-	if appErr.Code == appErrors.ErrUnknown {
-		appErr.Code = appErrors.ErrUnexpected
+	appErr := errResponse.Error
+	if errors.Is(appErr, appErrors.ErrUnknown) {
+		appErr.Code = appErrors.CodeErrUnexpected
 		appErr.Message = string(respBody)
 	}
 

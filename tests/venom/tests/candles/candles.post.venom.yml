@@ -34,15 +34,16 @@ testcases:
         assertions:
           - result.statuscode ShouldEqual 201
           - result.bodyjson ShouldHaveLength 1
-          - result.bodyjson.bodyjson0 ShouldHaveLength 8
-          - result.bodyjson.bodyjson0.id ShouldHaveLength 36
-          - result.bodyjson.bodyjson0.date ShouldEqual 2024-03-20T10:00:00Z
-          - result.bodyjson.bodyjson0.pair ShouldEqual "BTCUSDT"
-          - result.bodyjson.bodyjson0.interval ShouldEqual "1h"
-          - result.bodyjson.bodyjson0.open ShouldEqual 65000.5
-          - result.bodyjson.bodyjson0.close ShouldEqual 66000.5
-          - result.bodyjson.bodyjson0.high ShouldEqual 67000.5
-          - result.bodyjson.bodyjson0.low ShouldEqual 61000.5
+          - result.bodyjson.candles ShouldHaveLength 1
+          - result.bodyjson.candles.candles0 ShouldHaveLength 8
+          - result.bodyjson.candles.candles0.id ShouldHaveLength 36
+          - result.bodyjson.candles.candles0.date ShouldEqual 2024-03-20T10:00:00Z
+          - result.bodyjson.candles.candles0.pair ShouldEqual "BTCUSDT"
+          - result.bodyjson.candles.candles0.interval ShouldEqual "1h"
+          - result.bodyjson.candles.candles0.open ShouldEqual 65000.5
+          - result.bodyjson.candles.candles0.close ShouldEqual 66000.5
+          - result.bodyjson.candles.candles0.high ShouldEqual 67000.5
+          - result.bodyjson.candles.candles0.low ShouldEqual 61000.5
   - name: Create errors
     steps:
       - name: One candle duplicated candle should be ignored
@@ -77,15 +78,15 @@ testcases:
         assertions:
           - result.statuscode ShouldEqual 201
           - result.bodyjson ShouldHaveLength 1
-          - result.bodyjson.bodyjson0 ShouldHaveLength 8
-          - result.bodyjson.bodyjson0.id ShouldHaveLength 36
-          - result.bodyjson.bodyjson0.date ShouldEqual 2024-03-20T11:00:00Z
-          - result.bodyjson.bodyjson0.pair ShouldEqual "BTCUSDT"
-          - result.bodyjson.bodyjson0.interval ShouldEqual "1h"
-          - result.bodyjson.bodyjson0.open ShouldEqual 61111.5
-          - result.bodyjson.bodyjson0.close ShouldEqual 61111.5
-          - result.bodyjson.bodyjson0.high ShouldEqual 61111.5
-          - result.bodyjson.bodyjson0.low ShouldEqual 61111.5
+          - result.bodyjson.candles.candles0 ShouldHaveLength 8
+          - result.bodyjson.candles.candles0.id ShouldHaveLength 36
+          - result.bodyjson.candles.candles0.date ShouldEqual 2024-03-20T11:00:00Z
+          - result.bodyjson.candles.candles0.pair ShouldEqual "BTCUSDT"
+          - result.bodyjson.candles.candles0.interval ShouldEqual "1h"
+          - result.bodyjson.candles.candles0.open ShouldEqual 61111.5
+          - result.bodyjson.candles.candles0.close ShouldEqual 61111.5
+          - result.bodyjson.candles.candles0.high ShouldEqual 61111.5
+          - result.bodyjson.candles.candles0.low ShouldEqual 61111.5
       - name: Test invalid input
         type: http
         method: POST

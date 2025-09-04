@@ -1,24 +1,35 @@
 package errors
 
 import (
-	"errors"
 	"fmt"
+	"log"
 )
 
 type AppErrorCode int
 
 const (
-	ErrUnknown AppErrorCode = iota
-	ErrUnexpected
-	ErrNotFound
-	ErrUnauthorized
-	ErrForbidden
-	ErrInvalidInput
-	ErrAlreadyExists
+	CodeErrUnknown AppErrorCode = iota
+	CodeErrUnexpected
+	CodeErrNotFound
+	CodeErrUnauthorized
+	CodeErrForbidden
+	CodeErrInvalidInput
+	CodeErrAlreadyExists
+)
+
+// Error list to use with errors.Is
+var (
+	ErrUnknown       = &AppError{Code: CodeErrUnknown}
+	ErrUnexpected    = &AppError{Code: CodeErrUnexpected}
+	ErrNotFound      = &AppError{Code: CodeErrNotFound}
+	ErrUnauthorized  = &AppError{Code: CodeErrUnauthorized}
+	ErrForbidden     = &AppError{Code: CodeErrForbidden}
+	ErrInvalidInput  = &AppError{Code: CodeErrInvalidInput}
+	ErrAlreadyExists = &AppError{Code: CodeErrAlreadyExists}
 )
 
 type AppError struct {
-	Code    AppErrorCode `json:"code"`
+	Code    AppErrorCode `json:"app_code"`
 	Message string       `json:"message"`
 	Origin  error        `json:"-"`
 }
@@ -30,13 +41,23 @@ func (e AppError) Error() string {
 	return e.Message
 }
 
+func (e AppError) Is(target error) bool {
+	t, ok := target.(*AppError)
+	if !ok {
+		log.Printf("CanNOT cast target to AppError")
+		return false
+	}
+
+	return e.Code == t.Code
+}
+
 func (e AppError) Unwrap() error {
 	return e.Origin
 }
 
 func NewInvalidInput(message string, err error) *AppError {
 	return &AppError{
-		Code:    ErrInvalidInput,
+		Code:    CodeErrInvalidInput,
 		Message: message,
 		Origin:  err,
 	}
@@ -44,7 +65,7 @@ func NewInvalidInput(message string, err error) *AppError {
 
 func NewUnauthorized(message string, err error) *AppError {
 	return &AppError{
-		Code:    ErrUnauthorized,
+		Code:    CodeErrUnauthorized,
 		Message: message,
 		Origin:  err,
 	}
@@ -52,7 +73,7 @@ func NewUnauthorized(message string, err error) *AppError {
 
 func NewForbidden(message string, err error) *AppError {
 	return &AppError{
-		Code:    ErrForbidden,
+		Code:    CodeErrForbidden,
 		Message: message,
 		Origin:  err,
 	}
@@ -60,59 +81,15 @@ func NewForbidden(message string, err error) *AppError {
 
 func NewNotFound(message string) *AppError {
 	return &AppError{
-		Code:    ErrNotFound,
+		Code:    CodeErrNotFound,
 		Message: message,
 		Origin:  nil,
 	}
 }
 
-func AsNotFound(err error) bool {
-	if err == nil {
-		return false
-	}
-
-	var appErr *AppError
-	for {
-		if errors.As(err, &appErr) {
-			if appErr.Code == ErrNotFound {
-				return true
-			}
-		}
-
-		err = errors.Unwrap(err)
-		if err == nil {
-			break
-		}
-	}
-
-	return false
-}
-
-func AsAlreadyExists(err error) bool {
-	if err == nil {
-		return false
-	}
-
-	var appErr *AppError
-	for {
-		if errors.As(err, &appErr) {
-			if appErr.Code == ErrAlreadyExists {
-				return true
-			}
-		}
-
-		err = errors.Unwrap(err)
-		if err == nil {
-			break
-		}
-	}
-
-	return false
-}
-
 func NewUnexpected(message string, err error) *AppError {
 	return &AppError{
-		Code:    ErrUnexpected,
+		Code:    CodeErrUnexpected,
 		Message: message,
 		Origin:  err,
 	}
@@ -120,7 +97,7 @@ func NewUnexpected(message string, err error) *AppError {
 
 func NewAlreadyExists(message string) *AppError {
 	return &AppError{
-		Code:    ErrAlreadyExists,
+		Code:    CodeErrAlreadyExists,
 		Message: message,
 		Origin:  nil,
 	}

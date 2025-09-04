@@ -19,9 +19,14 @@ type ErrDetails struct {
 	Origin  error        `json:"-"`
 }
 
+// type ErrDetails struct {
+// 	AppError
+// 	TraceID string `json:"trace_id,omitempty"`
+// }
+
 var unexpectedErrMessage = ErrResponse{
 	Error: ErrDetails{
-		AppCode: ErrUnexpected,
+		AppCode: CodeErrUnexpected,
 		Message: "internal server error",
 	},
 }
@@ -89,15 +94,15 @@ var ErrorsHandler = func(err error, ctx echo.Context) {
 
 func (e *ErrResponse) GetHTTPCode() int {
 	switch e.Error.AppCode {
-	case ErrInvalidInput:
+	case CodeErrInvalidInput:
 		return http.StatusBadRequest
-	case ErrAlreadyExists:
+	case CodeErrAlreadyExists:
 		return http.StatusConflict
-	case ErrUnauthorized:
+	case CodeErrUnauthorized:
 		return http.StatusUnauthorized
-	case ErrForbidden:
+	case CodeErrForbidden:
 		return http.StatusForbidden
-	case ErrNotFound:
+	case CodeErrNotFound:
 		return http.StatusNotFound
 	}
 
