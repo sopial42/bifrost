@@ -1,10 +1,12 @@
 package positions
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/google/uuid"
 	buySignals "github.com/sopial42/bifrost/pkg/domains/buySignals"
+	"github.com/sopial42/bifrost/pkg/domains/candles"
 	"github.com/sopial42/bifrost/pkg/domains/common"
 )
 
@@ -21,7 +23,12 @@ type Details struct {
 	TP          float64             `json:"tp"`
 	SL          float64             `json:"sl"`
 	Metadata    map[string]any      `json:"metadata"`
-	Ratio       *float64            `json:"ratio,omitempty"`
+	Ratio       *Ratio              `json:"ratio,omitempty"`
+}
+
+type Ratio struct {
+	Value float64      `json:"value"`
+	Date  candles.Date `json:"date"`
 }
 
 type SerialID int64
@@ -44,6 +51,21 @@ func (i ID) String() string {
 
 func (i ID) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, uuid.UUID(i).String())), nil
+}
+
+func (i *ID) UnmarshalJSON(b []byte) error {
+	var s string
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+
+	parsed, err := uuid.Parse(s)
+	if err != nil {
+		return err
+	}
+
+	*i = ID(parsed)
+	return nil
 }
 
 type Name string

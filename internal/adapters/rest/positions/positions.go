@@ -26,6 +26,7 @@ func SetHandler(e *echo.Echo, service positionsSVC.Service) {
 	{
 		apiV1.POST("/positions", p.createPositions)
 		apiV1.POST("/positions/compute", p.computeAllPositions)
+		apiV1.POST("/positions/compute/:id", p.computePosition)
 	}
 }
 
@@ -40,11 +41,28 @@ type InputPositions struct {
 	TP          float64         `json:"tp"`
 	SL          float64         `json:"sl"`
 	Metadata    map[string]any  `json:"metadata"`
-	Ratio       float64         `json:"ratio"`
+	Ratio       *domain.Ratio   `json:"ratio,omitempty"`
+}
+
+func (p *positionsHandler) computePosition(context echo.Context) error {
+	id := context.Param("id")
+	idParsed, err := uuid.Parse(id)
+	if err != nil {
+		return appErrors.NewInvalidInput("invalid input", err)
+	}
+
+	updatedPosition, err := p.positionsSVC.ComputeRatio(context.Request().Context(), domain.ID(idParsed))
+	if err != nil {
+		return appErrors.NewUnexpected("unable to compute position", err)
+	}
+
+	return context.JSON(http.StatusOK, map[string]interface{}{
+		"position": updatedPosition,
+	})
 }
 
 func (p *positionsHandler) computeAllPositions(context echo.Context) error {
-	updatedPositionsCount, err := p.positionsSVC.ComputeAllPositions(context.Request().Context())
+	updatedPositionsCount, err := p.positionsSVC.ComputeAllRatios(context.Request().Context())
 	if err != nil {
 		return appErrors.NewUnexpected("unable to compute all positions", err)
 	}
@@ -73,7 +91,7 @@ func (p *positionsHandler) createPositions(context echo.Context) error {
 			TP:          pos.TP,
 			SL:          pos.SL,
 			Metadata:    pos.Metadata,
-			Ratio:       &pos.Ratio,
+			Ratio:       pos.Ratio,
 		}
 	}
 

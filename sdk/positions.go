@@ -6,6 +6,7 @@ import (
 
 	"github.com/sopial42/bifrost/pkg/domains/positions"
 	"github.com/sopial42/bifrost/pkg/errors"
+	"github.com/sopial42/bifrost/pkg/logger"
 )
 
 const defaultCreatePositionsChunckSize = 1000
@@ -26,6 +27,8 @@ func (c *client) CreatePositions(ctx context.Context, newPositions *[]positions.
 		chunckSize = defaultCreatePositionsChunckSize
 	}
 
+	log := logger.GetLogger(ctx)
+	log.Infof("Creating %d positions", len(*newPositions))
 	chuncks := createChunk(newPositions, chunckSize)
 	if chuncks == nil {
 		return nil, nil

@@ -3,10 +3,20 @@ services:
     image: postgres:16
     container_name: bifrost_db
     ports:
-    - 5433:5432
+    - 5432:5432
     environment:
     - POSTGRES_USER=bifrost
     - POSTGRES_PASSWORD=bifrost
     - POSTGRES_LOG_STATEMENT=all
     - POSTGRES_DB=bifrost
     command: ["postgres", "-c", "log_statement=all"]
+  pgweb:
+    container_name: pgweb
+    restart: always
+    image: sosedoff/pgweb
+    ports: 
+      - "8081:8081" 
+    environment:
+      - DATABASE_URL=postgres://bifrost:bifrost@bifrost_db:5432/bifrost?sslmode=disable
+    depends_on:
+      - db

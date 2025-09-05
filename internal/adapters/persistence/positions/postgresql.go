@@ -50,7 +50,7 @@ func (p *pgPersistence) InsertPositions(ctx context.Context, pos *[]domain.Detai
 func (p *pgPersistence) InsertRatios(ctx context.Context, pos *[]domain.Details) (*[]domain.Details, error) {
 	log := logger.GetLogger(ctx)
 	if pos == nil || len(*pos) == 0 {
-		log.Warnf("unable to insert, position details is nil, or len = 0: %v", pos)
+		log.Debugf("unable to insert, position details is nil, or len = 0: %v", pos)
 		return &[]domain.Details{}, nil
 	}
 
@@ -59,7 +59,7 @@ func (p *pgPersistence) InsertRatios(ctx context.Context, pos *[]domain.Details)
 	err := p.clientDB.
 		NewUpdate().
 		Model(&positionDAOs).
-		Column("ratio").
+		Column("ratio_value", "ratio_date").
 		Bulk().
 		Returning("position_dao.*").
 		Scan(ctx, &res)
@@ -73,7 +73,7 @@ func (p *pgPersistence) InsertRatios(ctx context.Context, pos *[]domain.Details)
 func (p *pgPersistence) GetPositionsWithNoRatio(ctx context.Context, cursor *int64, limit int) (positions *[]domain.Details, hasMore bool, nextCursor *int64, err error) {
 	positionsDAO := []PositionDAO{}
 	request := p.clientDB.NewSelect().Model(&positionsDAO).
-		Where("ratio IS NULL").
+		Where("ratio_value IS NULL").
 		Relation("BuySignal").
 		OrderExpr("serial_id ASC")
 
@@ -111,4 +111,26 @@ func (p *pgPersistence) GetPositionsWithNoRatio(ctx context.Context, cursor *int
 	}
 
 	return positionsModel, hasMore, nextCursor, err
+}
+
+func (p *pgPersistence) GetPositionByID(ctx context.Context, id domain.ID) (*domain.Details, error) {
+	positionDAO := PositionDAO{}
+	err := p.clientDB.NewSelect().Model(&positionDAO).
+		Relation("BuySignal").
+		Where("position_dao.id = ?", id.String()).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	positionModel, err := positionDAOsToPositionDetails([]PositionDAO{positionDAO})
+	if err != nil {
+		return nil, err
+	}
+
+	if positionModel == nil || len(*positionModel) == 0 {
+		return nil, nil
+	}
+
+	return &(*positionModel)[0], nil
 }

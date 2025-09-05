@@ -15,7 +15,7 @@ import (
 )
 
 const defaultCreateCandlesChunckSize = 1000
-const defaultGetCandlesLimit = 1000
+const defaultGetCandlesLimit = 100000
 
 type Candles interface {
 	// CreateCandles insert candles in the database, if a candle already exists, it will be ignored
@@ -168,7 +168,7 @@ func (c *client) GetCandleByDate(ctx context.Context, pair common.Pair, interval
 
 	queryValues.Add("pair", string(pair))
 	queryValues.Add("interval", string(interval))
-	queryValues.Add("date", date.String())
+	queryValues.Add("start_date", date.String())
 	queryValues.Add("limit", "1")
 
 	body, err := c.Get(ctx, "/candles?"+queryValues.Encode())

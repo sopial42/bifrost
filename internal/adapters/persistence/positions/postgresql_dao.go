@@ -1,9 +1,12 @@
 package positions
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	bsPersistence "github.com/sopial42/bifrost/internal/adapters/persistence/buySignals"
 	bsDomain "github.com/sopial42/bifrost/pkg/domains/buySignals"
+	candlesDomain "github.com/sopial42/bifrost/pkg/domains/candles"
 	positions "github.com/sopial42/bifrost/pkg/domains/positions"
 	"github.com/uptrace/bun"
 )
@@ -20,7 +23,8 @@ type PositionDAO struct {
 	TP          float64                     `bun:"tp"`
 	SL          float64                     `bun:"sl"`
 	Metadata    map[string]any              `bun:"metadata,type:jsonb"`
-	Ratio       float64                     `bun:"ratio,nullzero"`
+	RatioValue  *float64                    `bun:"ratio_value,nullzero"`
+	RatioDate   *time.Time                  `bun:"ratio_date,nullzero"`
 }
 
 func positionDetailsToPositionDAOs(positions *[]positions.Details) []PositionDAO {
@@ -53,7 +57,9 @@ func positionDetailsToPositionDAOs(positions *[]positions.Details) []PositionDAO
 		}
 
 		if pos.Ratio != nil {
-			positionDAOs[i].Ratio = *pos.Ratio
+			ratioDate := time.Time(pos.Ratio.Date)
+			positionDAOs[i].RatioValue = &pos.Ratio.Value
+			positionDAOs[i].RatioDate = &ratioDate
 		}
 
 	}
@@ -79,8 +85,15 @@ func positionDAOsToPositionDetails(positionsDAO []PositionDAO) (*[]positions.Det
 			Metadata:    p.Metadata,
 		}
 
-		if p.Ratio != 0 {
-			res[i].Ratio = &p.Ratio
+		if p.RatioValue != nil {
+			res[i].Ratio = &positions.Ratio{
+				Value: *p.RatioValue,
+			}
+		}
+
+		if p.RatioDate != nil {
+			ratioDate := candlesDomain.Date(*p.RatioDate)
+			res[i].Ratio.Date = ratioDate
 		}
 
 		if p.BuySignal != nil {
@@ -88,6 +101,7 @@ func positionDAOsToPositionDetails(positionsDAO []PositionDAO) (*[]positions.Det
 			bs := &bsDomain.Details{
 				ID:       &id,
 				Pair:     p.BuySignal.Pair,
+				Interval: p.BuySignal.Interval,
 				Date:     bsDomain.Date(p.BuySignal.Date),
 				Name:     p.BuySignal.Name,
 				Fullname: p.BuySignal.Fullname,

@@ -13,6 +13,8 @@ import (
 	"github.com/sopial42/bifrost/pkg/logger"
 )
 
+const backtestInterval = common.Interval("1m")
+
 type pgPersistence struct {
 	clientDB *bun.DB
 }
@@ -140,6 +142,10 @@ func (c *pgPersistence) QueryCandlesThatHitTPOrSL(ctx context.Context, pair comm
 			return nil, nil, fmt.Errorf("unable to perform db query: %w", err)
 		}
 
+		if candle == nil {
+			return nil, nil, nil
+		}
+
 		res[i] = candle
 	}
 
@@ -160,16 +166,46 @@ const (
 
 func (c *pgPersistence) searchPrice(ctx context.Context, pair common.Pair, buyDate domain.Date, search PriceHitSearch) (*domain.Candle, error) {
 	candleRes := []CandleDAO{}
+	log := logger.GetLogger(ctx)
 
+	// first ensure candles are present in DB with the backtest interval
+	dateReq := c.clientDB.NewSelect().Model(&candleRes).
+		Where("pair = ?", pair).
+		Where("interval = ?", backtestInterval).
+		Where("date >= ?", time.Time(buyDate)).
+		Limit(1)
+
+	err := dateReq.Scan(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("unable to perform db query: %w", err)
+	}
+
+	if len(candleRes) == 0 {
+		now := time.Now()
+		buyDateTime := time.Time(buyDate)
+
+		// If buyDate is today or yesterday, it's normal to not have data yet
+		// as market data is usually available with 1 day delay
+		if buyDateTime.Year() == now.Year() && buyDateTime.Month() == now.Month() {
+			daysDiff := now.Day() - buyDateTime.Day()
+			if daysDiff <= 1 {
+				log.Debugf("no available data for backtest. Pair: %s, interval: %s, buyDate: %s", pair, backtestInterval, buyDate)
+				return nil, nil
+			}
+		}
+		return nil, fmt.Errorf("no candles found for the backtest. Pair: %s, interval: %s, buyDate: %s", pair, backtestInterval, buyDate)
+	}
+
+	// Then perform the search
 	baseReq := c.clientDB.NewSelect().
 		Where("pair = ?", pair).
-		Where("interval = ?", "1m").
+		Where("interval = ?", backtestInterval).
 		Where("date >= ?", time.Time(buyDate)).
 		Where(string(search.Condition), search.Price).
 		OrderExpr("date ASC").
 		Limit(1)
 
-	err := baseReq.Model(&candleRes).
+	err = baseReq.Model(&candleRes).
 		Scan(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("unable to perform db query: %w", err)

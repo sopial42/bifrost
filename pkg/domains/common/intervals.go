@@ -26,37 +26,82 @@ const (
 	W1  Interval = "1w"
 )
 
-func (i Interval) RoundDateToBeginingOfInterval(currentTime time.Time) time.Time {
+func (i Interval) RoundDateToBeginingOfInterval(currentTime time.Time) *time.Time {
+	var newTime time.Time
+
 	switch i {
 	case W1:
-		currentTime = time.Time(currentTime).In(time.UTC).Truncate(7 * 24 * time.Hour)
+		newTime = time.Time(currentTime).In(time.UTC).Truncate(7 * 24 * time.Hour)
 	case D1:
-		currentTime = time.Time(currentTime).In(time.UTC).Truncate(24 * time.Hour)
+		newTime = time.Time(currentTime).In(time.UTC).Truncate(24 * time.Hour)
 	case H12:
-		currentTime = time.Time(currentTime).In(time.UTC).Truncate(12 * time.Hour)
+		newTime = time.Time(currentTime).In(time.UTC).Truncate(12 * time.Hour)
 	case H8:
-		currentTime = time.Time(currentTime).In(time.UTC).Truncate(8 * time.Hour)
+		newTime = time.Time(currentTime).In(time.UTC).Truncate(8 * time.Hour)
 	case H6:
-		currentTime = time.Time(currentTime).In(time.UTC).Truncate(6 * time.Hour)
+		newTime = time.Time(currentTime).In(time.UTC).Truncate(6 * time.Hour)
 	case H4:
-		currentTime = time.Time(currentTime).In(time.UTC).Truncate(4 * time.Hour)
+		newTime = time.Time(currentTime).In(time.UTC).Truncate(4 * time.Hour)
 	case H2:
-		currentTime = time.Time(currentTime).In(time.UTC).Truncate(2 * time.Hour)
+		newTime = time.Time(currentTime).In(time.UTC).Truncate(2 * time.Hour)
 	case H1:
-		currentTime = time.Time(currentTime).In(time.UTC).Truncate(1 * time.Hour)
+		newTime = time.Time(currentTime).In(time.UTC).Truncate(1 * time.Hour)
 	case M1:
-		currentTime = time.Time(currentTime).In(time.UTC).Truncate(1 * time.Minute)
+		newTime = time.Time(currentTime).In(time.UTC).Truncate(1 * time.Minute)
 	case M3:
-		currentTime = time.Time(currentTime).In(time.UTC).Truncate(3 * time.Minute)
+		newTime = time.Time(currentTime).In(time.UTC).Truncate(3 * time.Minute)
 	case M5:
-		currentTime = time.Time(currentTime).In(time.UTC).Truncate(5 * time.Minute)
+		newTime = time.Time(currentTime).In(time.UTC).Truncate(5 * time.Minute)
 	case M15:
-		currentTime = time.Time(currentTime).In(time.UTC).Truncate(15 * time.Minute)
+		newTime = time.Time(currentTime).In(time.UTC).Truncate(15 * time.Minute)
 	case M30:
-		currentTime = time.Time(currentTime).In(time.UTC).Truncate(30 * time.Minute)
+		newTime = time.Time(currentTime).In(time.UTC).Truncate(30 * time.Minute)
 	}
 
-	return currentTime
+	if newTime.IsZero() {
+		return nil
+	}
+
+	return &newTime
+}
+
+func AddOneInterval(currentTime time.Time, i Interval) *time.Time {
+	var newTime time.Time
+
+	switch i {
+	case W1:
+		newTime = time.Time(currentTime).In(time.UTC).Add(7 * 24 * time.Hour)
+	case D1:
+		newTime = time.Time(currentTime).In(time.UTC).Add(24 * time.Hour)
+	case H12:
+		newTime = time.Time(currentTime).In(time.UTC).Add(12 * time.Hour)
+	case H8:
+		newTime = time.Time(currentTime).In(time.UTC).Add(8 * time.Hour)
+	case H6:
+		newTime = time.Time(currentTime).In(time.UTC).Add(6 * time.Hour)
+	case H4:
+		newTime = time.Time(currentTime).In(time.UTC).Add(4 * time.Hour)
+	case H2:
+		newTime = time.Time(currentTime).In(time.UTC).Add(2 * time.Hour)
+	case H1:
+		newTime = time.Time(currentTime).In(time.UTC).Add(1 * time.Hour)
+	case M1:
+		newTime = time.Time(currentTime).In(time.UTC).Add(1 * time.Minute)
+	case M3:
+		newTime = time.Time(currentTime).In(time.UTC).Add(3 * time.Minute)
+	case M5:
+		newTime = time.Time(currentTime).In(time.UTC).Add(5 * time.Minute)
+	case M15:
+		newTime = time.Time(currentTime).In(time.UTC).Add(15 * time.Minute)
+	case M30:
+		newTime = time.Time(currentTime).In(time.UTC).Add(30 * time.Minute)
+	}
+
+	if newTime.IsZero() {
+		return nil
+	}
+
+	return &newTime
 }
 
 var Intervals = []Interval{

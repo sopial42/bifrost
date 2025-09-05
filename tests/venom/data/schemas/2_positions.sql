@@ -10,7 +10,8 @@ CREATE TABLE positions(
   tp              DOUBLE PRECISION,
   sl              DOUBLE PRECISION,
   metadata        JSONB,
-  ratio           DOUBLE PRECISION,
+  ratio_value     DOUBLE PRECISION,
+  ratio_date      TIMESTAMPTZ,
   CONSTRAINT FK_buy_signal_id FOREIGN KEY(buy_signal_id) REFERENCES buy_signals(id),
   UNIQUE (buy_signal_id, fullname),
   UNIQUE (id)

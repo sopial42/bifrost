@@ -12,6 +12,7 @@ import (
 )
 
 const defaultCreateBuySignalsChunckSize = 1000
+const defaultGetBuySignalsLimit = "100000"
 
 type BuySignals interface {
 	CreateBuySignals(ctx context.Context, buySignal *[]buySignals.Details) (*[]buySignals.Details, error)
@@ -65,6 +66,7 @@ func (c *client) GetBuySignals(ctx context.Context, pair common.Pair, interval c
 	queryValues.Add("pair", pair.String())
 	queryValues.Add("interval", interval.String())
 	queryValues.Add("name", string(name))
+	queryValues.Add("limit", defaultGetBuySignalsLimit)
 
 	if firstDate != nil {
 		queryValues.Add("first_date", firstDate.Format(time.RFC3339))
