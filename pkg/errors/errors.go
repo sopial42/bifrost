@@ -2,7 +2,6 @@ package errors
 
 import (
 	"fmt"
-	"log"
 )
 
 type AppErrorCode int
@@ -44,7 +43,6 @@ func (e AppError) Error() string {
 func (e AppError) Is(target error) bool {
 	t, ok := target.(*AppError)
 	if !ok {
-		log.Printf("CanNOT cast target to AppError")
 		return false
 	}
 

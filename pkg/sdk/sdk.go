@@ -68,9 +68,11 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response) ([]byte
 	}
 
 	appErr := errResponse.Error
-	if errors.Is(appErr, appErrors.ErrUnknown) {
-		appErr.Code = appErrors.CodeErrUnexpected
-		appErr.Message = string(respBody)
+	if errResponse.Error == nil || errors.Is(appErr, appErrors.ErrUnknown) {
+		appErr = &appErrors.AppError{
+			Code:    appErrors.CodeErrUnexpected,
+			Message: string(respBody),
+		}
 	}
 
 	return nil, appErr
