@@ -36,3 +36,12 @@ func (b *buySignalsService) GetBuySignals(ctx context.Context, pair common.Pair,
 
 	return bs, hasMore, nextCursor, nil
 }
+
+func (b *buySignalsService) UpsertBuySignals(ctx context.Context, buySignal domain.Details) (*[]domain.Details, error) {
+	bs, err := b.persistence.UpsertBuySignals(ctx, buySignal)
+	if err != nil {
+		return &[]domain.Details{}, fmt.Errorf("unable to upsert buy signals: %w", err)
+	}
+
+	return bs, nil
+}

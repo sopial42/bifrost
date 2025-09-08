@@ -2,22 +2,60 @@ name: Positions service
 version: '2'
 
 testcases:
-  - name: Reset db
+  - name: Compute one position
     steps:
-      - type: dbfixtures
-        database: postgres
-        dsn: "{{ .pgsql_dsn }}"
-        migrations: ../../data/schemas/
-        folder: ../../data/fixtures/positions/compute
-        retry: 10
-  - name: Compute positions
-    steps:
-      - type: http
-        method: POST
-        url: "{{.url}}/positions/compute"
-        headers:
-          Content-Type: application/json
-        assertions:
-          - result.statuscode ShouldEqual 200
-          - result.bodyjson ShouldHaveLength 1
-          - result.bodyjson.message ShouldEqual "1 positions computed"
+    - name: reset DB
+      type: dbfixtures
+      database: postgres
+      dsn: "{{ .pgsql_dsn }}"
+      migrations: ../../data/schemas/
+      folder: ../../data/fixtures/positions/compute
+      retry: 10
+    - type: http
+      method: POST
+      url: "{{.url}}/positions/compute/33334567-3333-3333-a456-000000000000"
+      headers:
+        Content-Type: application/json
+      assertions:
+        - result.statuscode ShouldEqual 200
+        - result.bodyjson ShouldHaveLength 1
+        - result.bodyjson.position ShouldHaveLength 10
+        - result.bodyjson.position.id ShouldEqual 33334567-3333-3333-a456-000000000000
+        - result.bodyjson.position.serial_id ShouldEqual 10001
+        - result.bodyjson.position.name ShouldEqual percent
+        - result.bodyjson.position.fullname ShouldEqual percent-00
+        - result.bodyjson.position.buy_signal_id ShouldEqual 123e4567-e89b-12d3-a456-426614174000
+        - result.bodyjson.position.tp ShouldEqual 208
+        - result.bodyjson.position.sl ShouldEqual 100
+        - result.bodyjson.position.metadata ShouldHaveLength 0
+        - result.bodyjson.position.ratio ShouldHaveLength 2
+        - result.bodyjson.position.ratio.value ShouldEqual 1.0426065162907268
+        - result.bodyjson.position.ratio.date ShouldEqual 2025-09-02T04:59:00Z
+        - result.bodyjson.position.buy_signal ShouldHaveLength 9
+        - result.bodyjson.position.buy_signal.id ShouldEqual 123e4567-e89b-12d3-a456-426614174000
+        - result.bodyjson.position.buy_signal.name ShouldEqual golden_cross
+        - result.bodyjson.position.buy_signal.fullname ShouldEqual Golden Cross BTC/USDT 1h
+        - result.bodyjson.position.buy_signal.business_id ShouldEqual ""
+        - result.bodyjson.position.buy_signal.pair ShouldEqual SOLUSDC
+        - result.bodyjson.position.buy_signal.interval ShouldEqual 1h
+        - result.bodyjson.position.buy_signal.date ShouldEqual 2025-09-02T02:00:00Z
+        - result.bodyjson.position.buy_signal.price ShouldEqual 199.5
+        - result.bodyjson.position.buy_signal.metadata ShouldHaveLength 1
+    - name: Compute all positions
+      steps:
+        - name: reset DB
+          type: dbfixtures
+          database: postgres
+          dsn: "{{ .pgsql_dsn }}"
+          migrations: ../../data/schemas/
+          folder: ../../data/fixtures/positions/compute
+          retry: 10
+        - type: http
+          method: POST
+          url: "{{.url}}/positions/compute/all"
+          headers:
+            Content-Type: application/json
+          assertions:
+            - result.statuscode ShouldEqual 200
+            - result.bodyjson ShouldHaveLength 1
+            - result.bodyjson.message ShouldEqual "1 positions computed"

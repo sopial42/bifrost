@@ -50,16 +50,16 @@ func positionDetailsToPositionDAOs(positions *[]positions.Details) []PositionDAO
 			Metadata:    pos.Metadata,
 		}
 
-		if uuid.UUID(pos.ID) != uuid.Nil {
-			positionDAOs[i].ID = uuid.UUID(pos.ID)
-		} else {
-			positionDAOs[i].ID = uuid.New()
-		}
-
 		if pos.Ratio != nil {
 			ratioDate := time.Time(pos.Ratio.Date)
 			positionDAOs[i].RatioValue = &pos.Ratio.Value
 			positionDAOs[i].RatioDate = &ratioDate
+		}
+
+		if pos.ID != nil && uuid.UUID(*pos.ID) != uuid.Nil {
+			positionDAOs[i].ID = uuid.UUID(*pos.ID)
+		} else {
+			positionDAOs[i].ID = uuid.New()
 		}
 
 	}
@@ -75,7 +75,6 @@ func positionDAOsToPositionDetails(positionsDAO []PositionDAO) (*[]positions.Det
 
 	for i, p := range positionsDAO {
 		res[i] = positions.Details{
-			ID:          positions.ID(p.ID),
 			SerialID:    positions.SerialID(p.SerialID),
 			BuySignalID: bsDomain.ID(p.BuySignalID),
 			Name:        positions.Name(p.Name),
@@ -83,6 +82,10 @@ func positionDAOsToPositionDetails(positionsDAO []PositionDAO) (*[]positions.Det
 			TP:          p.TP,
 			SL:          p.SL,
 			Metadata:    p.Metadata,
+		}
+
+		if p.ID != uuid.Nil {
+			res[i].ID = (*positions.ID)(&p.ID)
 		}
 
 		if p.RatioValue != nil {

@@ -143,7 +143,7 @@ func (c *pgPersistence) QueryCandlesThatHitTPOrSL(ctx context.Context, pair comm
 		}
 
 		if candle == nil {
-			return nil, nil, nil
+			continue
 		}
 
 		res[i] = candle
@@ -206,7 +206,7 @@ func (c *pgPersistence) searchPrice(ctx context.Context, pair common.Pair, buyDa
 		Limit(1)
 
 	err = baseReq.Model(&candleRes).
-		Scan(ctx)
+		Scan(ctx, &candleRes)
 	if err != nil {
 		return nil, fmt.Errorf("unable to perform db query: %w", err)
 	}

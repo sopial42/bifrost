@@ -10,6 +10,7 @@ import (
 
 	positionSVC "github.com/sopial42/bifrost/internal/services/positions"
 	domain "github.com/sopial42/bifrost/pkg/domains/positions"
+	appErrors "github.com/sopial42/bifrost/pkg/errors"
 	"github.com/sopial42/bifrost/pkg/logger"
 )
 
@@ -32,11 +33,10 @@ func (p *pgPersistence) InsertPositions(ctx context.Context, pos *[]domain.Detai
 	_, err := p.clientDB.
 		NewInsert().
 		Model(&positionDAOs).
-		Ignore().
 		Exec(ctx)
 	if err != nil {
 		if errPg, ok := err.(pgdriver.Error); ok && errPg.Field('C') == pgerrcode.UniqueViolation {
-			return &[]domain.Details{}, nil
+			return &[]domain.Details{}, appErrors.NewAlreadyExists("position already exists")
 		}
 
 		log.Errorf("Query refused, throw pgError, %v", err)
@@ -126,6 +126,39 @@ func (p *pgPersistence) GetPositionByID(ctx context.Context, id domain.ID) (*dom
 	positionModel, err := positionDAOsToPositionDetails([]PositionDAO{positionDAO})
 	if err != nil {
 		return nil, err
+	}
+
+	if positionModel == nil || len(*positionModel) == 0 {
+		return nil, nil
+	}
+
+	return &(*positionModel)[0], nil
+}
+
+func (p *pgPersistence) UpsertPosition(ctx context.Context, position *domain.Details) (*domain.Details, error) {
+	log := logger.GetLogger(ctx)
+	log.Debugf("Upsert position start with position: %+v", position)
+
+	positionDAO := positionDetailsToPositionDAOs(&[]domain.Details{*position})
+
+	log.Infof("Upsert position DAOs: %+v", positionDAO)
+	_, err := p.clientDB.
+		NewInsert().
+		Model(&positionDAO).
+		On("CONFLICT (buy_signal_id, fullname) DO UPDATE").
+		Set("tp = EXCLUDED.tp").
+		Set("sl = EXCLUDED.sl").
+		Column("name", "fullname", "buy_signal_id", "tp", "sl").
+		Returning("*").
+		Exec(ctx)
+	if err != nil || len(positionDAO) == 0 {
+		return nil, fmt.Errorf("unable to upsert position: %w", err)
+	}
+
+	log.Debugf("positionDAO length: %+v", positionDAO)
+	positionModel, err := positionDAOsToPositionDetails([]PositionDAO{positionDAO[0]})
+	if err != nil {
+		return nil, fmt.Errorf("unable to convert positionDAO to positionModel: %w", err)
 	}
 
 	if positionModel == nil || len(*positionModel) == 0 {

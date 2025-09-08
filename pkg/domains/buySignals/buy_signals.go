@@ -78,6 +78,10 @@ func MetadataToStruct[T any](metadata Metadata) (T, error) {
 
 type ID uuid.UUID
 
+func (i ID) String() string {
+	return uuid.UUID(i).String()
+}
+
 type Date time.Time
 
 func (d Date) String() string {

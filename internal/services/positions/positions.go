@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	buySignalsSVC "github.com/sopial42/bifrost/internal/services/buySignals"
 	candlesSVC "github.com/sopial42/bifrost/internal/services/candles"
 	"github.com/sopial42/bifrost/pkg/domains/candles"
 	"github.com/sopial42/bifrost/pkg/domains/common"
@@ -15,12 +16,14 @@ import (
 type positionsService struct {
 	persistence Persistence
 	candles     candlesSVC.Service
+	buySignals  buySignalsSVC.Service
 }
 
-func NewPositionsService(persistence Persistence, candles candlesSVC.Service) Service {
+func NewPositionsService(persistence Persistence, candles candlesSVC.Service, buySignals buySignalsSVC.Service) Service {
 	return &positionsService{
 		persistence: persistence,
 		candles:     candles,
+		buySignals:  buySignals,
 	}
 }
 
@@ -104,11 +107,13 @@ func (p *positionsService) ComputeAllRatios(ctx context.Context) (int, error) {
 
 func (p *positionsService) computeRatio(ctx context.Context, position *domain.Details) (*domain.Ratio, error) {
 	result := domain.Ratio{}
-
 	log := logger.GetLogger(ctx)
-	log.Debugf("computeRatio, buyDate: %s", position.BuySignal.Date)
+
+	if position.BuySignal == nil {
+		return nil, fmt.Errorf("buy signal is required")
+	}
+
 	buyDate := common.AddOneInterval(time.Time(position.BuySignal.Date), position.BuySignal.Interval)
-	log.Debugf("computeRatio, buyDate: %s", buyDate)
 	if buyDate == nil {
 		return nil, fmt.Errorf("unable to add one interval to the buy date, interval: %s", position.BuySignal.Interval)
 	}
@@ -119,6 +124,7 @@ func (p *positionsService) computeRatio(ctx context.Context, position *domain.De
 	}
 
 	if tpCandle == nil && slCandle == nil {
+		log.Debugf("no candles that hit. position: %+v, bs: %+v", position, position.BuySignal)
 		return nil, nil
 	}
 
@@ -139,4 +145,46 @@ func (p *positionsService) computeRatio(ctx context.Context, position *domain.De
 	}
 
 	return &result, nil
+}
+
+func (p *positionsService) CreatePositionsWithBuySignals(ctx context.Context, positions *[]domain.Details) (*[]domain.Details, error) {
+	addedPositions := make([]domain.Details, 0)
+	for _, position := range *positions {
+		if position.BuySignal == nil {
+			return nil, fmt.Errorf("buy signal is required")
+		}
+
+		newBS, err := p.buySignals.UpsertBuySignals(ctx, *position.BuySignal)
+		if err != nil {
+			return nil, fmt.Errorf("unable to create buy signal: %w", err)
+		}
+
+		if newBS == nil || len(*newBS) == 0 {
+			return nil, fmt.Errorf("unable to upsert buy signal")
+		}
+
+		currentBS := (*newBS)[0]
+		position.BuySignalID = *currentBS.ID
+		position.BuySignal.ID = currentBS.ID
+		var newPos *domain.Details
+
+		newPos, err = p.persistence.UpsertPosition(ctx, &position)
+		if err != nil {
+			return nil, fmt.Errorf("unable to upsert position: %w", err)
+		}
+
+		if newPos == nil {
+			return nil, fmt.Errorf("unable to upsert position")
+		}
+
+		newPos.BuySignal = &currentBS
+		ratio, err := p.computeRatio(ctx, newPos)
+		if err != nil {
+			return nil, fmt.Errorf("unable to compute ratio: %w", err)
+		}
+		newPos.Ratio = ratio
+		addedPositions = append(addedPositions, *newPos)
+	}
+
+	return &addedPositions, nil
 }

@@ -50,7 +50,7 @@ func main() {
 	candlesService := candlesSVC.NewCandlesService(candlesPersistence)
 
 	positionsPersistence := positionsPersistence.NewPersistence(pgClient.Client)
-	positionsService := positionsSVC.NewPositionsService(positionsPersistence, candlesService)
+	positionsService := positionsSVC.NewPositionsService(positionsPersistence, candlesService, buySignalsService)
 
 	// Custom logger
 	log := logger.NewLogger(config.Logger)

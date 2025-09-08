@@ -14,7 +14,7 @@ const LoggerKeyName = "positions"
 const LoggerKeyFullname = "positions_fullname"
 
 type Details struct {
-	ID          ID                  `json:"id"`
+	ID          *ID                  `json:"id"`
 	SerialID    SerialID            `json:"serial_id"`
 	Name        Name                `json:"name"`
 	Fullname    Fullname            `json:"fullname"`

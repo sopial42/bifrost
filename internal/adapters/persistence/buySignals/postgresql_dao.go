@@ -45,7 +45,7 @@ func buySignalDetailsToBuySignalDAOs(ctx context.Context, buySignals *[]domain.D
 
 		if isUpdate {
 			if bs.ID == nil {
-				log.Warnf("unable to update buy signal as ID is nil: %+v", bs)
+				log.Debugf("unable to update buy signal as ID is nil: %+v", bs)
 				continue
 			}
 

@@ -12,6 +12,7 @@ import (
 	buySignalsSVC "github.com/sopial42/bifrost/internal/services/buySignals"
 	domain "github.com/sopial42/bifrost/pkg/domains/buySignals"
 	"github.com/sopial42/bifrost/pkg/domains/common"
+	appErrors "github.com/sopial42/bifrost/pkg/errors"
 	"github.com/sopial42/bifrost/pkg/logger"
 )
 
@@ -26,22 +27,20 @@ func NewPersistence(client *bun.DB) buySignalsSVC.Persistence {
 func (c *pgPersistence) InsertBuySignals(ctx context.Context, bsReports *[]domain.Details) (*[]domain.Details, error) {
 	log := logger.GetLogger(ctx)
 	if bsReports == nil || len(*bsReports) == 0 {
-		return &[]domain.Details{}, nil
+		return &[]domain.Details{}, fmt.Errorf("unable to insert buy signal, nil or empty")
 	}
 
 	buySignalsDAO := buySignalDetailsToBuySignalDAOs(ctx, bsReports, false)
 	_, err := c.clientDB.
 		NewInsert().
 		Model(&buySignalsDAO).
-		Ignore().
 		Exec(ctx)
 	if err != nil {
 		if errPg, ok := err.(pgdriver.Error); ok && errPg.Field('C') == pgerrcode.UniqueViolation {
-			return &[]domain.Details{}, nil
+			return &[]domain.Details{}, appErrors.NewAlreadyExists("buy signal already exists")
 		}
 
-		log.Errorf("Query refused, throw pgError, %v", err)
-		return &[]domain.Details{}, err
+		return &[]domain.Details{}, fmt.Errorf("unable to insert buy signals: %w", err)
 	}
 
 	res := buySignalDAOsToBuySignalDetails(ctx, &buySignalsDAO)
@@ -87,4 +86,25 @@ func (c *pgPersistence) QueryBuySignals(ctx context.Context, pair common.Pair, i
 	}
 
 	return buySignalDAOsToBuySignalDetails(ctx, &buySignalsDAO), hasMore, nextCursor, nil
+}
+
+func (c *pgPersistence) UpsertBuySignals(ctx context.Context, bs domain.Details) (*[]domain.Details, error) {
+	bsDAO := buySignalDetailsToBuySignalDAOs(ctx, &[]domain.Details{bs}, true)
+	if len(bsDAO) == 0 {
+		return &[]domain.Details{}, fmt.Errorf("unable to upsert buy signals, empty")
+	}
+
+	_, err := c.clientDB.
+		NewInsert().
+		Model(&bsDAO).
+		On("CONFLICT (pair, interval, fullname, business_id) DO UPDATE").
+		Set("price = EXCLUDED.price").
+		Set("metadata = EXCLUDED.metadata").
+		Returning("*").
+		Exec(ctx)
+	if err != nil {
+		return &[]domain.Details{}, fmt.Errorf("unable to upsert buy signals: %w", err)
+	}
+
+	return buySignalDAOsToBuySignalDetails(ctx, &bsDAO), nil
 }
