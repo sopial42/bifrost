@@ -127,6 +127,26 @@ func (c *pgPersistence) QueryCandlesFromLastDate(ctx context.Context, pair commo
 	return candlesDAOsToCandlesDetails(ctx, &result), hasMore, nextCursor, nil
 }
 
+func (c *pgPersistence) QueryCandlesPriceByDate(ctx context.Context, pair common.Pair, date domain.Date) (float64, error) {
+	candleRes := []CandleDAO{}
+	err := c.clientDB.NewSelect().Model(&candleRes).
+		Where("pair = ?", pair).
+		Where("interval = ?", common.Interval("1m")).
+		Where("date = ?", date).
+		Limit(1).
+		Scan(ctx)
+
+	if err != nil {
+		return 0.0, fmt.Errorf("unable to perform db query: %w", err)
+	}
+
+	if len(candleRes) == 0 {
+		return 0.0, nil
+	}
+
+	return candleRes[0].Close, nil
+}
+
 func (c *pgPersistence) QueryCandlesThatHitTPOrSL(ctx context.Context, pair common.Pair, buyDate domain.Date, tp float64, sl float64) (*domain.Candle, *domain.Candle, error) {
 	res := make([]*domain.Candle, 2)
 

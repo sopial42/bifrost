@@ -16,6 +16,7 @@ type Service interface {
 	GetCandlesFromLastDate(context.Context, common.Pair, common.Interval, *time.Time, int) (candles *[]domain.Candle, hasMore bool, nextCursor *time.Time, err error)
 	GetCandlesThatHitTPOrSL(ctx context.Context, pair common.Pair, buyDate domain.Date, tp float64, sl float64) (*domain.Candle, *domain.Candle, error)
 	UpdateCandlesRSI(context.Context, *[]domain.Candle) (*[]domain.Candle, error)
+	GetCandlesMinuteClosePricesByDate(context.Context, PriceRequest) (PriceResponse, error)
 }
 
 type Persistence interface {
@@ -23,6 +24,7 @@ type Persistence interface {
 	UpdateCandlesRSI(context.Context, *[]domain.Candle) (*[]domain.Candle, error)
 	QueryCandles(context.Context, common.Pair, common.Interval, *time.Time, *time.Time, int) (*[]domain.Candle, bool, *time.Time, error)
 	QueryCandlesFromLastDate(context.Context, common.Pair, common.Interval, *time.Time, int) (*[]domain.Candle, bool, *time.Time, error)
+	QueryCandlesPriceByDate(context.Context, common.Pair, domain.Date) (float64, error)
 	QueryCandlesThatHitTPOrSL(context.Context, common.Pair, domain.Date, float64, float64) (*domain.Candle, *domain.Candle, error)
 	QuerySurroundingDates(context.Context, common.Pair, common.Interval) (*domain.Date, *domain.Date, error)
 }

@@ -76,3 +76,29 @@ func (p *candlesService) UpdateCandlesRSI(ctx context.Context, candles *[]domain
 
 	return candles, nil
 }
+
+type PriceRequest map[common.Pair][]domain.Date
+type PriceResponse map[common.Pair]map[PriceRequestDate]float64
+
+type PriceRequestDate string
+
+func (p *candlesService) GetCandlesMinuteClosePricesByDate(ctx context.Context, pricesRequest PriceRequest) (PriceResponse, error) {
+	response := make(PriceResponse)
+	for pair, dates := range pricesRequest {
+		for _, date := range dates {
+			newDate := common.Interval(common.M1).RoundDateToBeginingOfInterval(time.Time(date))
+			price, err := p.persistence.QueryCandlesPriceByDate(ctx, pair, domain.Date(*newDate))
+			if err != nil {
+				return nil, fmt.Errorf("unable to get candles prices: %w", err)
+			}
+
+			if _, ok := response[pair]; !ok {
+				response[pair] = make(map[PriceRequestDate]float64)
+			}
+
+			response[pair][PriceRequestDate(date.String())] = price
+		}
+	}
+
+	return response, nil
+}

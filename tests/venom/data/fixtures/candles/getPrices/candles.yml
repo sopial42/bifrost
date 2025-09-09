@@ -1,0 +1,26 @@
+- id: 83e98bf6-aa44-48df-b86a-5ad84b02295a
+  date: 2025-09-01 11:06:00+0000
+  pair: SOLUSDC
+  interval: 1m
+  open: 1
+  close: 198
+  high: 1
+  low: 1
+
+- id: cd211a52-42a7-47b2-bb09-f0119e70bf57
+  date: 2025-09-01 11:07:00+0000
+  pair: SOLUSDC
+  interval: 1m
+  open: 1
+  close: 199.67
+  high: 1
+  low: 1
+
+- id: 2f50ef06-0d72-4f28-8242-a1ad82d134db
+  date: 2025-09-01 11:08:00+0000
+  pair: SOLUSDC
+  interval: 1m
+  open: 1
+  close: 199.38
+  high: 1
+  low: 1

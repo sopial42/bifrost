@@ -27,6 +27,7 @@ func SetHandler(e *echo.Echo, service candlesSVC.Service) {
 	{
 		apiV1.GET("/candles/surrounding-dates", p.getSurroundingDates)
 		apiV1.GET("/candles", p.getCandles)
+		apiV1.POST("/candles/minute-close-prices", p.getCandlesMinuteClosePricesByDate)
 		apiV1.GET("/candles/from-last-date", p.getCandlesFromLastDate)
 		apiV1.POST("/candles", p.createcandles)
 		apiV1.PATCH("/candles/rsi", p.updateCandlesRSI)
@@ -200,5 +201,24 @@ func (p *candlesHandler) updateCandlesRSI(context echo.Context) error {
 
 	return context.JSON(http.StatusOK, map[string]interface{}{
 		"candles": candles,
+	})
+}
+
+// Return the closing price of the candle for a given pair and date using 1 minute interval data
+func (p *candlesHandler) getCandlesMinuteClosePricesByDate(context echo.Context) error {
+	ctx := context.Request().Context()
+
+	input := new(candlesSVC.PriceRequest)
+	if err := context.Bind(input); err != nil {
+		return appErrors.NewInvalidInput("invalid input", err)
+	}
+
+	candlesPrices, err := p.candlesSVC.GetCandlesMinuteClosePricesByDate(ctx, *input)
+	if err != nil {
+		return fmt.Errorf("unable to get candles prices: %w", err)
+	}
+
+	return context.JSON(http.StatusOK, map[string]interface{}{
+		"prices": candlesPrices,
 	})
 }

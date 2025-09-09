@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/labstack/gommon/log"
 	"github.com/sopial42/bifrost/pkg/domains/candles"
 	"github.com/sopial42/bifrost/pkg/domains/common"
 	"github.com/sopial42/bifrost/pkg/errors"
@@ -30,6 +31,7 @@ type Candles interface {
 	// Return nextCursor = the last candle date if there are more candles to fetch
 	GetCandles(ctx context.Context, pair common.Pair, interval common.Interval, startDate *time.Time, limit uint) (res *[]candles.Candle, hasMore bool, nextCursor *time.Time, err error)
 	GetCandleByDate(ctx context.Context, pair common.Pair, interval common.Interval, date candles.Date) (res *candles.Candle, err error)
+	GetCandlesMinuteClosePriceByDate(ctx context.Context, prices PriceRequest) (*PriceResponse, error)
 	// GetCandlesByLastDate reverse the cursor, the next_cursor has to be used as last_date argument
 	GetCandlesByLastDate(ctx context.Context, pair common.Pair, interval common.Interval, lastDate candles.Date, limit uint) (res *[]candles.Candle, hasMore bool, nextCursor *time.Time, err error)
 
@@ -41,6 +43,34 @@ type Candles interface {
 	// QuerySurroundingDates returns the first and last candle date for a given pair and interval
 	// It returns 404 not found if no candles are found for the given pair and interval
 	QuerySurroundingDates(ctx context.Context, pair common.Pair, interval common.Interval) (*candles.Date, *candles.Date, error)
+}
+
+type PriceRequest map[common.Pair][]candles.Date
+type PriceResponse map[common.Pair]map[PriceRequestDate]float64
+
+type PriceRequestDate string
+
+func (c *client) GetCandlesMinuteClosePriceByDate(ctx context.Context, prices PriceRequest) (*PriceResponse, error) {
+	body, err := json.Marshal(prices)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal prices: %w", err)
+	}
+
+	res, err := c.Post(ctx, "/candles/minute-close-prices", body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get candles close price: %w", err)
+	}
+
+	log.Infof("res: %s", string(res))
+	postResponse := struct {
+		Prices PriceResponse `json:"prices"`
+	}{}
+
+	err = json.Unmarshal(res, &postResponse)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal candles close price: %w", err)
+	}
+	return &postResponse.Prices, nil
 }
 
 func (c *client) CreateCandles(ctx context.Context, newCandles *[]candles.Candle, chunckSize int) (*[]candles.Candle, error) {
