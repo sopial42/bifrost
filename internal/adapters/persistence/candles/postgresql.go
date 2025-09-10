@@ -2,6 +2,7 @@ package candles
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -213,7 +214,8 @@ func (c *pgPersistence) searchPrice(ctx context.Context, pair common.Pair, buyDa
 				return nil, nil
 			}
 		}
-		return nil, fmt.Errorf("no candles found for the backtest. Pair: %s, interval: %s, buyDate: %s", pair, backtestInterval, buyDate)
+		errMsg := fmt.Sprintf("no candles found for the backtest. Pair: %s, interval: %s, buyDate: %s", pair, backtestInterval, buyDate.String())
+		return nil, errors.New(errMsg)
 	}
 
 	// Then perform the search

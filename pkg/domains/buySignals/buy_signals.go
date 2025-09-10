@@ -24,12 +24,14 @@ type Details struct {
 	Metadata   Metadata        `json:"metadata,omitempty"`
 }
 
-var MorningStarName Name = "morningStar"
 var RSIDivergenceName Name = "rsiDivergence"
+var MorningStarName Name = "morningStar"
+var XName Name = "x"
 
 var AllAvailableSignalStrategies = map[Name]bool{
 	MorningStarName:   true,
 	RSIDivergenceName: true,
+	XName:             true,
 }
 
 type Metadata map[string]any
