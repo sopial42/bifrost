@@ -24,6 +24,9 @@ type Details struct {
 	SL          float64             `json:"sl"`
 	Metadata    map[string]any      `json:"metadata"`
 	Ratio       *Ratio              `json:"ratio,omitempty"`
+	// WinLoss ratio is used to compute the stoploss
+	// On specific needs, if can be nil if stoploss is manually added
+	WinlossRatio *WinLossRatio `json:"winloss_ratio,omitempty"`
 }
 
 type Ratio struct {

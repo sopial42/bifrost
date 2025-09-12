@@ -38,6 +38,7 @@ const (
 
 var Pairs = []Pair{
 	BTCUSDC,
+	BTCUSDT,
 	SOLUSDC,
 	ETHUSDC,
 	BNBUSDC,

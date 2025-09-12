@@ -38,13 +38,14 @@ type NewPositionInput struct {
 }
 
 type InputPositions struct {
-	Name        domain.Name     `json:"name"`
-	Fullname    domain.Fullname `json:"fullname"`
-	BuySignalID uuid.UUID       `json:"buy_signal_id"`
-	TP          float64         `json:"tp"`
-	SL          float64         `json:"sl"`
-	Metadata    map[string]any  `json:"metadata"`
-	Ratio       *domain.Ratio   `json:"ratio,omitempty"`
+	Name         domain.Name          `json:"name"`
+	Fullname     domain.Fullname      `json:"fullname"`
+	BuySignalID  uuid.UUID            `json:"buy_signal_id"`
+	TP           float64              `json:"tp"`
+	SL           float64              `json:"sl"`
+	Metadata     map[string]any       `json:"metadata"`
+	Ratio        *domain.Ratio        `json:"ratio,omitempty"`
+	WinlossRatio *domain.WinLossRatio `json:"winloss_ratio,omitempty"`
 }
 
 func (p *positionsHandler) computePosition(context echo.Context) error {
@@ -88,13 +89,14 @@ func (p *positionsHandler) createPositions(context echo.Context) error {
 	newPositionsDetails := make([]domain.Details, len(newPositionInput.Positions))
 	for i, pos := range newPositionInput.Positions {
 		newPositionsDetails[i] = domain.Details{
-			BuySignalID: buysignals.ID(pos.BuySignalID),
-			Name:        pos.Name,
-			Fullname:    pos.Fullname,
-			TP:          pos.TP,
-			SL:          pos.SL,
-			Metadata:    pos.Metadata,
-			Ratio:       pos.Ratio,
+			BuySignalID:  buysignals.ID(pos.BuySignalID),
+			Name:         pos.Name,
+			Fullname:     pos.Fullname,
+			TP:           pos.TP,
+			SL:           pos.SL,
+			Metadata:     pos.Metadata,
+			Ratio:        pos.Ratio,
+			WinlossRatio: pos.WinlossRatio,
 		}
 	}
 

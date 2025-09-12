@@ -12,6 +12,7 @@ CREATE TABLE positions(
   metadata        JSONB,
   ratio_value     DOUBLE PRECISION,
   ratio_date      TIMESTAMPTZ,
+  winloss_ratio   DOUBLE PRECISION,
   CONSTRAINT FK_buy_signal_id FOREIGN KEY(buy_signal_id) REFERENCES buy_signals(id),
   UNIQUE (buy_signal_id, fullname),
   UNIQUE (id)

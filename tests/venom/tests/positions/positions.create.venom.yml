@@ -33,14 +33,15 @@ testcases:
                   "notes": "Strong trend following golden cross"
                 },
                 "ratio_value": 0.5,
-                "ratio_date": "2024-03-20T10:00:00Z"
+                "ratio_date": "2024-03-20T10:00:00Z",
+                "winloss_ratio": 0.33
               }
             ]
           }
         assertions:
           - result.statuscode ShouldEqual 201
           - result.bodyjson ShouldHaveLength 1
-          - result.bodyjson.positions.positions0 ShouldHaveLength 8
+          - result.bodyjson.positions.positions0 ShouldHaveLength 9
           - result.bodyjson.positions.positions0.name ShouldEqual "simple"
           - result.bodyjson.positions.positions0.fullname ShouldEqual "simple-1-1"
           - result.bodyjson.positions.positions0.buy_signal_id ShouldEqual 123e4567-e89b-12d3-a456-426614174000
@@ -50,3 +51,4 @@ testcases:
           - result.bodyjson.positions.positions0.serial_id ShouldEqual 10001
           - result.bodyjson.positions.positions0.metadata ShouldHaveLength 4
           - result.bodyjson.positions.positions0.buy_signal ShouldBeNil
+          - result.bodyjson.positions.positions0.winloss_ratio ShouldEqual 0.33

@@ -14,17 +14,18 @@ import (
 type PositionDAO struct {
 	bun.BaseModel `bun:"table:positions"`
 
-	ID          uuid.UUID                   `bun:"id,pk,type:uuid,default:uuid_generate_v4()"`
-	SerialID    int64                       `bun:"serial_id,autoincrement"`
-	BuySignalID uuid.UUID                   `bun:"type:uuid"`
-	BuySignal   *bsPersistence.BuySignalDAO `bun:"rel:belongs-to,join:buy_signal_id=id"`
-	Name        string                      `bun:"name"`
-	Fullname    string                      `bun:"fullname"`
-	TP          float64                     `bun:"tp"`
-	SL          float64                     `bun:"sl"`
-	Metadata    map[string]any              `bun:"metadata,type:jsonb"`
-	RatioValue  *float64                    `bun:"ratio_value,nullzero"`
-	RatioDate   *time.Time                  `bun:"ratio_date,nullzero"`
+	ID           uuid.UUID                   `bun:"id,pk,type:uuid,default:uuid_generate_v4()"`
+	SerialID     int64                       `bun:"serial_id,autoincrement"`
+	BuySignalID  uuid.UUID                   `bun:"type:uuid"`
+	BuySignal    *bsPersistence.BuySignalDAO `bun:"rel:belongs-to,join:buy_signal_id=id"`
+	Name         string                      `bun:"name"`
+	Fullname     string                      `bun:"fullname"`
+	TP           float64                     `bun:"tp"`
+	SL           float64                     `bun:"sl"`
+	Metadata     map[string]any              `bun:"metadata,type:jsonb"`
+	RatioValue   *float64                    `bun:"ratio_value,nullzero"`
+	RatioDate    *time.Time                  `bun:"ratio_date,nullzero"`
+	WinlossRatio *float64                    `bun:"winloss_ratio,nullzero"`
 }
 
 func positionDetailsToPositionDAOs(positions *[]positions.Details) []PositionDAO {
@@ -48,6 +49,11 @@ func positionDetailsToPositionDAOs(positions *[]positions.Details) []PositionDAO
 			TP:          tp,
 			SL:          sl,
 			Metadata:    pos.Metadata,
+		}
+
+		if pos.WinlossRatio != nil {
+			winlossRatio := float64(*pos.WinlossRatio)
+			positionDAOs[i].WinlossRatio = &winlossRatio
 		}
 
 		if pos.Ratio != nil {
@@ -92,6 +98,10 @@ func positionDAOsToPositionDetails(positionsDAO []PositionDAO) (*[]positions.Det
 			res[i].Ratio = &positions.Ratio{
 				Value: *p.RatioValue,
 			}
+		}
+
+		if p.WinlossRatio != nil {
+			res[i].WinlossRatio = (*positions.WinLossRatio)(p.WinlossRatio)
 		}
 
 		if p.RatioDate != nil {
