@@ -37,7 +37,7 @@ func (c *pgPersistence) InsertBuySignals(ctx context.Context, bsReports *[]domai
 		Exec(ctx)
 	if err != nil {
 		if errPg, ok := err.(pgdriver.Error); ok && errPg.Field('C') == pgerrcode.UniqueViolation {
-			return &[]domain.Details{}, appErrors.NewAlreadyExists("buy signal already exists")
+			return &[]domain.Details{}, appErrors.NewAlreadyExists("buy signal already exists, unique constraint violation")
 		}
 
 		return &[]domain.Details{}, fmt.Errorf("unable to insert buy signals: %w", err)

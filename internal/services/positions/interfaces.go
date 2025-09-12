@@ -17,6 +17,7 @@ type Persistence interface {
 	InsertPositions(context.Context, *[]domain.Details) (*[]domain.Details, error)
 	InsertRatios(context.Context, *[]domain.Details) (*[]domain.Details, error)
 	GetPositionsWithNoRatio(ctx context.Context, cursor *int64, limit int) (positions *[]domain.Details, hasMore bool, nextCursor *int64, err error)
+	GetPositionsWithNoRatioCount(ctx context.Context) (count int, err error)
 	GetPositionByID(ctx context.Context, id domain.ID) (*domain.Details, error)
 	UpsertPosition(ctx context.Context, position *domain.Details) (*domain.Details, error)
 }

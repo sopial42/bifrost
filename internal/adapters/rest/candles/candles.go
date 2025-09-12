@@ -1,6 +1,7 @@
 package candles
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -49,7 +50,7 @@ func (p *candlesHandler) createcandles(context echo.Context) error {
 	}
 
 	candles, err := p.candlesSVC.CreateCandles(context.Request().Context(), &input.Candles)
-	if err != nil {
+	if err != nil && !errors.Is(err, appErrors.ErrAlreadyExists) {
 		return fmt.Errorf("unable to create candles: %w", err)
 	}
 

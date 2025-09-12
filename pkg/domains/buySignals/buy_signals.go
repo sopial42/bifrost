@@ -28,6 +28,8 @@ var RSIDivergenceName Name = "rsiDivergence"
 var MorningStarName Name = "morningStar"
 var XName Name = "x"
 
+var ArgsDefaultSignalStrategies = []Name{MorningStarName, RSIDivergenceName, XName}
+
 var AllAvailableSignalStrategies = map[Name]bool{
 	MorningStarName:   true,
 	RSIDivergenceName: true,

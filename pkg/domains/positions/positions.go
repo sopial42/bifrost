@@ -35,13 +35,11 @@ type SerialID int64
 
 const (
 	FibonacciName  Name = "fibonacci"
-	PivotPointName Name = "pivotPoint"
 	PercentageName Name = "percentage"
 )
 
 var AllAvailablePositionStategies = map[Name]bool{
 	FibonacciName:  true,
-	PivotPointName: true,
 	PercentageName: true,
 }
 

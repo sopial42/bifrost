@@ -74,6 +74,8 @@ func (p *pgPersistence) GetPositionsWithNoRatio(ctx context.Context, cursor *int
 	positionsDAO := []PositionDAO{}
 	request := p.clientDB.NewSelect().Model(&positionsDAO).
 		Where("ratio_value IS NULL").
+		Where("tp > 0").
+		Where("sl > 0").
 		Relation("BuySignal").
 		OrderExpr("serial_id ASC")
 
@@ -111,6 +113,20 @@ func (p *pgPersistence) GetPositionsWithNoRatio(ctx context.Context, cursor *int
 	}
 
 	return positionsModel, hasMore, nextCursor, err
+}
+
+func (p *pgPersistence) GetPositionsWithNoRatioCount(ctx context.Context) (count int, err error) {
+	// Add check on tp and sl != 0
+	count, err = p.clientDB.NewSelect().
+		Model(&PositionDAO{}).
+		Where("ratio_value IS NULL").
+		Where("tp > 0").
+		Where("sl > 0").
+		Count(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("unable to perform ratio count db query: %v", err)
+	}
+	return count, nil
 }
 
 func (p *pgPersistence) GetPositionByID(ctx context.Context, id domain.ID) (*domain.Details, error) {

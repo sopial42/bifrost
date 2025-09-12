@@ -99,7 +99,7 @@ func (p *positionsHandler) createPositions(context echo.Context) error {
 	}
 
 	positions, err := p.positionsSVC.CreatePositions(context.Request().Context(), &newPositionsDetails)
-	if err != nil {
+	if err != nil && !errors.Is(err, appErrors.ErrAlreadyExists) {
 		return appErrors.NewUnexpected("unable to create positions", err)
 	}
 
@@ -195,7 +195,7 @@ func (p *positionsHandler) createPositionsWithBuySignals(context echo.Context) e
 	}
 
 	positions, err := p.positionsSVC.CreatePositionsWithBuySignals(context.Request().Context(), &input.Positions)
-	if err != nil {
+	if err != nil && !errors.Is(err, appErrors.ErrAlreadyExists) {
 		return appErrors.NewUnexpected("unable to create positions with buy signals", err)
 	}
 

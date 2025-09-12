@@ -60,5 +60,6 @@ func (c *client) CreatePositions(ctx context.Context, newPositions *[]positions.
 		createdPositions = append(createdPositions, postResponse.Positions...)
 	}
 
+	log.Infof("Created %d positions", len(createdPositions))
 	return &createdPositions, nil
 }

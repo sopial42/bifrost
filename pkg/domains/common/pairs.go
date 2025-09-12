@@ -13,8 +13,10 @@ type Pair string
 const PairLoggerKey = "pair"
 const (
 	BTCUSDC   Pair = "BTCUSDC"
+	BTCUSDT   Pair = "BTCUSDT"
 	SOLUSDC   Pair = "SOLUSDC"
 	ETHUSDC   Pair = "ETHUSDC"
+	ETHUSDT   Pair = "ETHUSDT"
 	BNBUSDC   Pair = "BNBUSDC"
 	XRPUSDC   Pair = "XRPUSDC"
 	PEPEUSDC  Pair = "PEPEUSDC"

@@ -1,6 +1,8 @@
 package buysignals
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -69,8 +71,8 @@ func (p *buySignalsHandler) createBuySignals(context echo.Context) error {
 	}
 
 	buySignals, err := p.buySignalsSVC.CreateBuySignals(context.Request().Context(), &newBuySignalsDetails)
-	if err != nil {
-		return appErrors.NewUnexpected("unable to create buySignals", err)
+	if err != nil && !errors.Is(err, appErrors.ErrAlreadyExists) {
+		return fmt.Errorf("unable to create buySignals: %w", err)
 	}
 
 	return context.JSON(http.StatusCreated, map[string]any{

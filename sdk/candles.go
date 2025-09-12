@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/labstack/gommon/log"
 	"github.com/sopial42/bifrost/pkg/domains/candles"
 	"github.com/sopial42/bifrost/pkg/domains/common"
 	"github.com/sopial42/bifrost/pkg/errors"
@@ -61,7 +60,6 @@ func (c *client) GetCandlesMinuteClosePriceByDate(ctx context.Context, prices Pr
 		return nil, fmt.Errorf("failed to get candles close price: %w", err)
 	}
 
-	log.Infof("res: %s", string(res))
 	postResponse := struct {
 		Prices PriceResponse `json:"prices"`
 	}{}

@@ -3,12 +3,10 @@ package positions
 import (
 	"context"
 	"fmt"
-	"time"
 
 	buySignalsSVC "github.com/sopial42/bifrost/internal/services/buySignals"
 	candlesSVC "github.com/sopial42/bifrost/internal/services/candles"
 	"github.com/sopial42/bifrost/pkg/domains/candles"
-	"github.com/sopial42/bifrost/pkg/domains/common"
 	domain "github.com/sopial42/bifrost/pkg/domains/positions"
 	"github.com/sopial42/bifrost/pkg/logger"
 )
@@ -59,6 +57,12 @@ func (p *positionsService) ComputeAllRatios(ctx context.Context) (int, error) {
 	log := logger.GetLogger(ctx)
 	updatedPositionsCount := 0
 
+	positionsCount, err := p.persistence.GetPositionsWithNoRatioCount(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("unable to get positions with no ratio count: %w", err)
+	}
+
+	log.Infof("Positions with no ratio count: %d", positionsCount)
 	for hasMore {
 		positions, hasMore, nextCursor, err = p.persistence.GetPositionsWithNoRatio(ctx, nextCursor, 100)
 		if err != nil {
@@ -91,13 +95,18 @@ func (p *positionsService) ComputeAllRatios(ctx context.Context) (int, error) {
 			positionsWithRatios = append(positionsWithRatios, position)
 		}
 
+		if len(positionsWithRatios) == 0 {
+			log.Infof("No positions with ratios found")
+			continue
+		}
+
 		updatedPositions, err := p.persistence.InsertRatios(ctx, &positionsWithRatios)
 		if err != nil {
 			return 0, fmt.Errorf("unable to insert ratios: %w", err)
 		}
 
 		if updatedPositions != nil {
-			log.Infof("Updated positions: %v", len(*updatedPositions))
+			log.Infof("Total updated positions: %v", len(*updatedPositions))
 			updatedPositionsCount += len(*updatedPositions)
 		}
 	}
@@ -113,12 +122,7 @@ func (p *positionsService) computeRatio(ctx context.Context, position *domain.De
 		return nil, fmt.Errorf("buy signal is required")
 	}
 
-	buyDate := common.AddOneInterval(time.Time(position.BuySignal.Date), position.BuySignal.Interval)
-	if buyDate == nil {
-		return nil, fmt.Errorf("unable to add one interval to the buy date, interval: %s", position.BuySignal.Interval)
-	}
-
-	tpCandle, slCandle, err := p.candles.GetCandlesThatHitTPOrSL(ctx, position.BuySignal.Pair, candles.Date(*buyDate), position.TP, position.SL)
+	tpCandle, slCandle, err := p.candles.GetCandlesThatHitTPOrSL(ctx, position.BuySignal.Pair, candles.Date(position.BuySignal.Date), position.TP, position.SL)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get candles that hit the TP or the SL: %w", err)
 	}

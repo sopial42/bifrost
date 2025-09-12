@@ -24,6 +24,7 @@ const (
 	H12 Interval = "12h"
 	D1  Interval = "1d"
 	W1  Interval = "1w"
+	NA  Interval = "NA"
 )
 
 func (i Interval) RoundDateToBeginingOfInterval(currentTime time.Time) *time.Time {
@@ -119,6 +120,7 @@ var Intervals = []Interval{
 	H12,
 	D1,
 	W1,
+	NA,
 }
 
 var ArgsDefaultIntervals []string
