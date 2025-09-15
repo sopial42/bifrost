@@ -14,8 +14,8 @@ import (
 	"github.com/sopial42/bifrost/pkg/logger"
 )
 
-const defaultCreateCandlesChunckSize = 1000
-const defaultGetCandlesLimit = 100000
+const defaultCreateCandlesChunckSize = 5000
+const defaultGetCandlesLimit = 5000
 
 type Candles interface {
 	// CreateCandles insert candles in the database, if a candle already exists, it will be ignored

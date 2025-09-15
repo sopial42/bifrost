@@ -15,7 +15,7 @@ testcases:
       - name: Get buySignals with limit 1
         type: http
         method: GET
-        url: "{{.url}}/buy_signals?pair=BTCUSDT&interval=1h&name=golden_cross&first_date=2024-03-20T10:00:00Z&limit=1"
+        url: "{{.url}}/buy_signals?pair=BTCUSDC&interval=1h&name=golden_cross&first_date=2024-03-20T10:00:00Z&limit=1"
         headers:
           Content-Type: application/json
         assertions:
@@ -33,7 +33,7 @@ testcases:
       - name: Get buySignals no limit but first_date
         type: http
         method: GET
-        url: "{{.url}}/buy_signals?pair=BTCUSDT&interval=1h&name=golden_cross&first_date=2024-03-20T14:00:00Z&limit=0"
+        url: "{{.url}}/buy_signals?pair=BTCUSDC&interval=1h&name=golden_cross&first_date=2024-03-20T14:00:00Z&limit=0"
         headers:
           Content-Type: application/json
         assertions:

@@ -43,7 +43,7 @@ var ErrorsHandler = func(err error, ctx echo.Context) {
 	log := logger.GetLogger(c)
 
 	if errors.As(err, &appErr) {
-		log.Debugf("AppError: %v", appErr)
+		log.Err(appErr).Errorf("AppError: %v", appErr)
 		errResponse := ErrResponse{
 			Error: ErrDetails{
 				AppCode: appErr.Code,

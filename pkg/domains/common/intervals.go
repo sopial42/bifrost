@@ -27,6 +27,26 @@ const (
 	NA  Interval = "NA"
 )
 
+
+var Intervals = []Interval{
+	// S1,
+	M1,
+	M3,
+	M5,
+	M15,
+	M30,
+	H1,
+	H2,
+	H4,
+	H6,
+	H8,
+	H12,
+	D1,
+	W1,
+	NA,
+}
+
+
 func (i Interval) RoundDateToBeginingOfInterval(currentTime time.Time) *time.Time {
 	var newTime time.Time
 
@@ -103,24 +123,6 @@ func AddOneInterval(currentTime time.Time, i Interval) *time.Time {
 	}
 
 	return &newTime
-}
-
-var Intervals = []Interval{
-	// S1,
-	M1,
-	M3,
-	M5,
-	M15,
-	M30,
-	H1,
-	H2,
-	H4,
-	H6,
-	H8,
-	H12,
-	D1,
-	W1,
-	NA,
 }
 
 var ArgsDefaultIntervals []string

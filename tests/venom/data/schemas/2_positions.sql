@@ -14,7 +14,6 @@ CREATE TABLE positions(
   ratio_date      TIMESTAMPTZ,
   winloss_ratio   DOUBLE PRECISION,
   CONSTRAINT FK_buy_signal_id FOREIGN KEY(buy_signal_id) REFERENCES buy_signals(id),
-  UNIQUE (buy_signal_id, fullname),
+  UNIQUE (buy_signal_id, fullname, winloss_ratio),
   UNIQUE (id)
 );
-

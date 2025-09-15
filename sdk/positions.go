@@ -9,7 +9,7 @@ import (
 	"github.com/sopial42/bifrost/pkg/logger"
 )
 
-const defaultCreatePositionsChunckSize = 1000
+const defaultCreatePositionsChunckSize = 1
 
 type Positions interface {
 	CreatePositions(ctx context.Context, positions *[]positions.Details, chunckSize int) (*[]positions.Details, error)
