@@ -38,8 +38,8 @@ func (d *Date) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (d *Date) String() string {
-	return time.Time(*d).Format(time.RFC3339)
+func (d Date) String() string {
+	return time.Time(d).Format(time.RFC3339)
 }
 
 func (i ID) MarshalJSON() ([]byte, error) {

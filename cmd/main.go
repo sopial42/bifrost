@@ -13,24 +13,23 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	gommonLog "github.com/labstack/gommon/log"
 
-	persistence "github.com/sopial42/bifrost/internal/adapters/persistence"
+	persistence "github.com/sopial42/bifrost/pkg/adapters/persistence"
 
-	buySignalsPersistence "github.com/sopial42/bifrost/internal/adapters/persistence/buySignals"
-	buySignalsHTTPHandler "github.com/sopial42/bifrost/internal/adapters/rest/buySignals"
-	buySignalsSVC "github.com/sopial42/bifrost/internal/services/buySignals"
+	HTTPHandler "github.com/sopial42/bifrost/internal/adapters/httpserver"
 
-	candlesPersistence "github.com/sopial42/bifrost/internal/adapters/persistence/candles"
-	candlesHTTPHandler "github.com/sopial42/bifrost/internal/adapters/rest/candles"
-	candlesSVC "github.com/sopial42/bifrost/internal/services/candles"
+	buySignalsPersistence "github.com/sopial42/bifrost/pkg/adapters/persistence/buySignals"
+	buySignalsSVC "github.com/sopial42/bifrost/pkg/services/buySignals"
 
-	positionsPersistence "github.com/sopial42/bifrost/internal/adapters/persistence/positions"
-	positionsHTTPHandler "github.com/sopial42/bifrost/internal/adapters/rest/positions"
-	positionsSVC "github.com/sopial42/bifrost/internal/services/positions"
+	candlesPersistence "github.com/sopial42/bifrost/pkg/adapters/persistence/candles"
+	candlesSVC "github.com/sopial42/bifrost/pkg/services/candles"
 
-	"github.com/sopial42/bifrost/internal/config"
-	"github.com/sopial42/bifrost/pkg/errors"
-	"github.com/sopial42/bifrost/pkg/logger"
-	"github.com/sopial42/bifrost/pkg/pinger"
+	positionsPersistence "github.com/sopial42/bifrost/pkg/adapters/persistence/positions"
+	positionsSVC "github.com/sopial42/bifrost/pkg/services/positions"
+
+	"github.com/sopial42/bifrost/pkg/common/config"
+	"github.com/sopial42/bifrost/pkg/common/errors"
+	"github.com/sopial42/bifrost/pkg/common/logger"
+	"github.com/sopial42/bifrost/pkg/common/pinger"
 )
 
 const pingRoute = "/ping"
@@ -70,9 +69,9 @@ func main() {
 	})
 	engine.Use(corsConfig)
 
-	buySignalsHTTPHandler.SetHandler(engine, buySignalsService)
-	candlesHTTPHandler.SetHandler(engine, candlesService)
-	positionsHTTPHandler.SetHandler(engine, positionsService)
+	HTTPHandler.SetBuySignalsHTTPHandler(engine, buySignalsService)
+	HTTPHandler.SetCandlesHTTPHandler(engine, candlesService)
+	HTTPHandler.SetPositionsHTTPHandler(engine, positionsService)
 
 	// Start the server and handle shutdown
 	go func() {
