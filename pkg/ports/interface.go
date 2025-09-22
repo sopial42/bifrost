@@ -10,7 +10,7 @@ import (
 	"github.com/sopial42/bifrost/pkg/domains/positions"
 )
 
-type Bifrost interface {
+type Client interface {
 	Candles
 	BuySignals
 	Positions

@@ -9,7 +9,7 @@ type client struct {
 	*sdk.Client
 }
 
-func NewBifrostHTTPClient(baseURL string) ports.Bifrost {
+func NewBifrostHTTPClient(baseURL string) ports.Client {
 	return &client{
 		sdk.NewSDKClient(baseURL),
 	}

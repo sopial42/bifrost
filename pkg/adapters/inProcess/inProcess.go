@@ -1,4 +1,4 @@
-package http
+package inProcess
 
 import (
 	persistence "github.com/sopial42/bifrost/pkg/adapters/persistence"
@@ -18,8 +18,7 @@ type inProcessClient struct {
 	positionsSVC  positionsSVC.Service
 }
 
-func NewBifrostInProcessClient(dbConfig config.DBConfig) ports.Bifrost {
-
+func NewBifrostInProcessClient(dbConfig config.DBConfig) ports.Client {
 	pgClient := persistence.NewPGClient(dbConfig)
 	buySignalsPersistence := buySignalsPersistence.NewPersistence(pgClient.Client)
 	candlesPersistence := candlesPersistence.NewPersistence(pgClient.Client)
